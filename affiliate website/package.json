@@ -1,0 +1,17 @@
+{
+  "name": "affiliate_website",
+  "version": "1.0.0",
+  "description": "serve side ",
+  "main": "server_node.js",
+  "dependencies": {
+    "body-parser": "^1.13.2",
+    "express": "*",
+    "mysql": "^2.7.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
