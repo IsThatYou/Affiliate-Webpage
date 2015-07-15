@@ -20,9 +20,14 @@ var pool = mysql.createPool({
 
 
 var express = require('express');
+
 var app = express();
+
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 var bodyParser = require('body-parser');
 var path = require("path");
+
 console.log("express working fine");
 
 app.use(bodyParser.urlencoded({extended: false}));
@@ -32,14 +37,51 @@ app.get('/',function(req,res){
   res.sendFile("views/Signup_Application.html", {root:__dirname});
 });
 
+function query(sql, connection, callback) {
+    	connection.query(sql, function selectCb(error, results, fields) {
+        if (error) {
+            //
+        }
+        
+        callback(results);
+        
+    });
+}
+
+app.get('/approve',function(req,res){
+	//add sign up authention
+	sql = "SELECT First_Name, Last_Name, SSN_TAX_ID, Site_URL1, Site_Category1," +
+	"Address1, City, State, State2, Country, Zip, Phone FROM client_info " +
+	"WHERE approved = 0;";
+	pool.getConnection(function(err, connection) {
+  	// Use the connection
+  		connection.query(sql, function selectCb(err, results, fields) {
+  		if (err){
+  			console.log(err.message);
+  		}
+    // And done with the connection.
+    	if (results.length > 0){
+
+	    	console.log("sent");
+	    	console.log(results[0].First_Name);
+	    	connection.release();
+    	}
+    // Don't use the connection here, it has been returned to the pool.
+ 	 });
+  	});
+  		
+
+  res.sendFile("views/affiliateApproval.html", {root:__dirname});
+});
+
 //connection.connect();
 app.post('/signup',function(req,res, err){
-	/*
+	
 	if (err){
 		res.sendFile("views/Signup_Application.html", {root:__dirname});
 		
 	}
-	else{*/
+	else{
 	var proparray = [];
 	for (var prop in req.body){
 		proparray.push(prop);
@@ -155,9 +197,9 @@ app.post('/signup',function(req,res, err){
   });
 });
 	
-	res.end("yes");
+	res.sendFile("views/affiliateLinks.html", {root: __dirname});
 
-//}
+}
 });
 
 app.listen(3000,'127.0.0.1', function(){
@@ -213,6 +255,7 @@ var sql = "CREATE TABLE client_info( " +
 	"Mailing_Freq CHAR(20)," + 
 	"Time_Record CHAR(3)" +
 	")";
+	Assigned ID
 connection.query(sql);
 *//////
 

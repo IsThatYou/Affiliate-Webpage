@@ -6,7 +6,9 @@
   "dependencies": {
     "body-parser": "^1.13.2",
     "express": "*",
-    "mysql": "^2.7.0"
+    "mysql": "^2.7.0",
+    "socket.io": "*",
+    "http": "*"
   },
   "devDependencies": {},
   "scripts": {

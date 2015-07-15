@@ -76,3 +76,7 @@ padding: 10px;
 h2 {
   margin-top:7px;
 }
+.padding > .row {
+  margin-left: -1px;
+  margin-right: -1px;
+}
