@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
   <head>
     <title>Affiliate Website</title>
@@ -54,66 +55,15 @@
         <div class="container">
           <div class="page-header">
             <h2>Applications</h2>
-           
           </div>
-          <div class="content">
-            <div class="firstArea panel panel-default">
-              <div class="row">
-                <div class="col-xs-12 padding" style="width:100%">
-                  <div class="input-daterange input-group" id="datepicker">
-                    <a class="btn btn-link">
-                    <h2>John Dell</h2>
-                  </a>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="padding">
-                  <div>
-                    <div class="col-md-3"><h6>SSN/Tax ID: <strong>123456789</strong></h6></div>
-                    <div class="col-md-3"><h6>Site URL: <strong>http://example.com</strong></h6></div>
-                    <div class="col-md-3"><h6>Site Categories: <strong>Retailing</strong></h6></div>
-                  </div>
-                  <div>
-                    <div class="col-md-8"><h6><strong>Address, City, State, Country, Zip code</strong></h6></div>
-                    <div class="col-md-4"><h6>Phone: <strong>201-xxx-xxxx</h6></div>
-                    
-                  </div>
-                  <a class="btn btn-danger btn-sm pull-right" href="#" style="width:18%;margin-right:15px" role="button">Deny</a>
-                  <a class="btn btn-success btn-sm pull-right" href="#" style="width:18%;" role="button">Approve</a>
-                </div>
-              </div>
-            </div>
+          <div class="content" id="app-content">
+            
               <!-- No.2-->
-              <div class="firstArea panel panel-default">
-              <div class="row">
-                <div class="col-xs-12 padding" style="width:100%">
-                  <div class="input-daterange input-group" id="datepicker">
-                    <a class="btn btn-link">
-                    <h2>Allen Washinton</h2>
-                  </a>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="padding">
-                  <div>
-                    <div class="col-md-3"><h6>SSN/Tax ID: <strong>123456789</strong></h6></div>
-                    <div class="col-md-3"><h6>Site URL: <strong>http://example.com</strong></h6></div>
-                    <div class="col-md-3"><h6>Site Categories: <strong>Retailing</strong></h6></div>
-                  </div>
-                  <div>
-                    <div class="col-md-8"><h6><strong>Address, City, State, Country, Zip code</strong></h6></div>
-                    <div class="col-md-4"><h6>Phone: <strong>201-xxx-xxxx</strong></h6></div>
-                    
-                  </div>
-                  <a class="btn btn-danger btn-sm pull-right" href="#" style="width:18%;margin-right:15px" role="button">Deny</a>
-                  <a class="btn btn-success btn-sm pull-right" href="#" style="width:18%;" role="button">Approve</a>
-                </div>
-              </div>
-              </div>
-
+              
+            </div>
+          </div>
         </div>
+     
 
 
           
@@ -142,7 +92,12 @@
     }, function() {
     $(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
     });</script> 
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/javacript2.js"></script>
+    <!--<script>
+      var socket = io();
+      socket.emit('hi');
+    </script>-->
   </body>
 </html>

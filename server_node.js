@@ -20,10 +20,8 @@ var pool = mysql.createPool({
 
 
 var express = require('express');
-
 var app = express();
-
-var http = require('http').Server(app);
+var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var bodyParser = require('body-parser');
 var path = require("path");
@@ -32,9 +30,12 @@ console.log("express working fine");
 app.use(bodyParser.urlencoded({extended: false}));
 //app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
+app.use(express.static(__dirname + '/views'));
 app.get('/',function(req,res){
   res.sendFile("views/Signup_Application.html", {root:__dirname});
 });
+
+
 
 
 
@@ -49,6 +50,7 @@ function request_fr_mysql(){
 	sql = "SELECT First_Name, Last_Name, SSN_TAX_ID, Site_URL1, Site_Category1," +
 	"Address1, City, State, State2, Country, Zip, Phone FROM client_info " +
 	"WHERE approved = 0;";
+	var finall;
 	pool.getConnection(function(err, connection) {
   	// Use the connection
   		connection.query(sql, function selectCb(err, results, fields) {
@@ -59,23 +61,77 @@ function request_fr_mysql(){
     	if (results.length > 0){
 
 	    	console.log("sent");
-	    	console.log(results[0].First_Name);
+	    	
+	    	finall = results;
 	    	connection.release();
-	    	return results;
+	    	console.log(results[0]);
+	    	return finall;
     	}
     // Don't use the connection here, it has been returned to the pool.
  	 });
   	});
+  	return finall;
 }
 
 io.on("connection", function(socket){
 	console.log("socket connected...");
 	
-	socket.on("request_application_info", function(data){
+	socket.on("application info", function(){
 		// Send client's info when requested.
-		results = request_fr_mysql();
-		console.log("message:" + results);
-		socket.emit("application_info", {results:results});
+		//var results = request_fr_mysql();
+		sql = "SELECT First_Name, Last_Name, SSN_TAX_ID, Site_URL1, Site_Category1," +
+		"Address1, City, State, State2, Country, Zip, Phone, Assigned_ID FROM client_info " +
+		"WHERE approved = 0;";
+		pool.getConnection(function(err, connection) {
+	  	// Use the connection
+	  		connection.query(sql, function selectCb(err, results, fields) {
+	  		if (err){
+	  			console.log(err.message);
+	  		}
+	    // And done with the connection.
+	    	if (results.length > 0){
+
+		    	console.log("page updated");
+				socket.emit("application_info", {results:results});
+		    	
+	    	}
+	    // Don't use the connection here, it has been returned to the pool.
+	 	 });
+	  	});
+	});
+	// 0, not vertified.  1, approved.  2, denied.
+	socket.on("approve", function(id){
+		// add sending email 
+		console.log("approveing request sent");
+		sql = "UPDATE client_info SET approved = 1 WHERE Assigned_ID = " + id.ID + ";";
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function selectCb(err, results, fields) {
+				if (err){
+					console.log(err.message);
+				}
+				if (results.length > 0){
+					console.log("ID:" + id.ID + "has been approved");
+					
+				}
+			});
+		});
+	});
+
+	socket.on("deny", function(id){
+		// add sending email 
+		console.log("denying request sent");
+		sql = "UPDATE client_info SET approved = 2 WHERE Assigned_ID = " + id.ID + ";";
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function selectCb(err, results, fields) {
+				if (err){
+					console.log(err.message);
+				}
+				if (results.length > 0){
+					console.log("ID:" + id.ID + "has been denied");
+					
+				}
+			});
+		});
 	});
 	
 
@@ -270,12 +326,10 @@ app.post('/signup',function(req,res, err){
 }
 });
 
-http.listen(3000,'127.0.0.1', function(){
+
+http.listen(3000, function(){
   console.log("Started on PORT 3000");
 })
-
-
-
 
 /* Table Created, this section of code may not be further used.
 // Can be optimized with CHAR

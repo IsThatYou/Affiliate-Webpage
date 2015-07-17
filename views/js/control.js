@@ -1,7 +1,6 @@
-$( document ).ready(function(){
-	
-	var form = $('frm1');
-	$("#sign_up").on('click', function(){
+//$( document ).ready(function(){
+	function signup(form){
+	//$("#sign_up").on('click', function(){
 		if (form.name.value == "")
 	  { alert("Please include your first name!"); form.name.focus(); return; }
 	  
@@ -60,5 +59,6 @@ $( document ).ready(function(){
 	  { alert("Please check agreement!"); form.agree.focus(); return; }
  
 	  form.submit();
-	});
-	});
+	}
+	//});
+	//});
