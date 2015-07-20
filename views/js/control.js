@@ -1,6 +1,7 @@
 //$( document ).ready(function(){
 	function signup(form){
 	//$("#sign_up").on('click', function(){
+		console.log(form);
 		if (form.name.value == "")
 	  { alert("Please include your first name!"); form.name.focus(); return; }
 	  

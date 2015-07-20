@@ -5,10 +5,12 @@
   "main": "server_node.js",
   "dependencies": {
     "body-parser": "^1.13.2",
+    "emailjs": "^0.3.16",
     "express": "*",
+    "http": "*",
     "mysql": "^2.7.0",
-    "socket.io": "*",
-    "http": "*"
+    "nodemailer": "^1.4.0",
+    "socket.io": "*"
   },
   "devDependencies": {},
   "scripts": {

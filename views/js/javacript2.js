@@ -1,6 +1,7 @@
 $(function() {
 	var socket = io("http://127.0.0.1:3000/");
   socket.emit("application info");
+  $("#app-content").append("There seems to be nothing left.");
   //var $button = $('.btn');
 	//use both empty and remove when removing DOM
 	//Haven't been tested yet
@@ -37,15 +38,14 @@ $(function() {
 		console.log("success");
 	};
   
+  var email = '';
 	socket.on("application_info", function(data){
+    console.log(data.results.length);
     if (data.results.length > 0){
     for (var i in data.results){
+      $("#app-content").empty();
       updateHTML(data.results[i]);
     }}
-    else {
-      //
-      $("#app-content").append("There seems to be nothing left.");
-    }
 		
 	});
   /*

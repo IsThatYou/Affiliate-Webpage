@@ -72,7 +72,7 @@ function request_fr_mysql(){
   	});
   	return finall;
 }
-
+var email = require('emailjs');
 io.on("connection", function(socket){
 	console.log("socket connected...");
 	
@@ -104,6 +104,7 @@ io.on("connection", function(socket){
 		// add sending email 
 		console.log("approveing request sent");
 		sql = "UPDATE client_info SET approved = 1 WHERE Assigned_ID = " + id.ID + ";";
+		sql2 = "SELECT Email FROM client_info WHERE Assigned_ID = " + id.ID + ";";
 		pool.getConnection(function(err, connection){
 			connection.query(sql, function selectCb(err, results, fields) {
 				if (err){
@@ -111,8 +112,37 @@ io.on("connection", function(socket){
 				}
 				if (results.length > 0){
 					console.log("ID:" + id.ID + "has been approved");
-					
 				}
+				
+			});
+			// Will test it when the server goes up
+			connection.query(sql2, function selectCb(err, results, fields) {
+				if (err){
+					console.log(err.message);
+				}
+				if (results.length > 0){
+					console.log(results[0].Email);
+					var to = results[0].Email;
+					var from = 'example@gmail.com';
+					var emailserver = email.server.connect({
+					   user:    "username", 
+					   password:"password", 
+					   // the host needs to be setup SMTP
+					   host:    "http://localhost", 
+					   ssl:     false
+					});
+
+					emailserver.send({
+					   text:    "i hope this works", 
+					   from:    from,
+					   //to
+					   to:      "me <jwang@cminyc.com>, another <junlinwang18@gmail.com>",
+					   cc:      "",
+					   subject: "testing emailjs"
+					}, function(err, message) { console.log(err || message); });
+
+				}
+				connection.release();
 			});
 		});
 	});
@@ -130,6 +160,35 @@ io.on("connection", function(socket){
 					console.log("ID:" + id.ID + "has been denied");
 					
 				}
+				// Will test it when the server goes up
+				connection.query(sql2, function selectCb(err, results, fields) {
+				if (err){
+					console.log(err.message);
+				}
+				if (results.length > 0){
+					console.log(results[0].Email);
+					var to = results[0].Email;
+					var from = 'example@gmail.com';
+					var emailserver = email.server.connect({
+					   user:    "username", 
+					   password:"password", 
+					   // the host needs to be setup SMTP
+					   host:    "http://localhost", 
+					   ssl:     false
+					});
+
+					emailserver.send({
+					   text:    "i hope this works", 
+					   from:    from, 
+					   to:      "me <jwang@cminyc.com>, another <junlinwang18@gmail.com>",
+					   cc:      "",
+					   subject: "testing emailjs"
+					}, function(err, message) { console.log(err || message); });
+
+				}
+				connection.release();
+			});
+
 			});
 		});
 	});
@@ -193,19 +252,25 @@ app.get('/approve',function(req,res){
  	 });
   	});
   	*/
-  		
-
+  	
   res.sendFile("views/affiliateApproval.html", {root:__dirname});
 });
 
+app.get('/login', function(req, res, err){
+	//
+	res.sendFile("views/affiliateLinks.html", {root: __dirname});
+});
+
+
 //connection.connect();
-app.post('/signup',function(req,res, err){
-	
-	if (err){
-		res.sendFile("views/Signup_Application.html", {root:__dirname});
-		
+app.post('/signup',function(req, res, err){
+	console.log('urf');
+	/*if (err){
+		//res.sendFile("views/Signup_Application.html", {root:__dirname});
+		console.log(err);
+		next(err);
 	}
-	else{
+	else{*/
 	var proparray = [];
 	for (var prop in req.body){
 		proparray.push(prop);
@@ -321,9 +386,9 @@ app.post('/signup',function(req,res, err){
   });
 });
 	
-	res.sendFile("views/affiliateLinks.html", {root: __dirname});
+	res.sendFile("views/affiliateLogin.html", {root: __dirname});
 
-}
+//}
 });
 
 
