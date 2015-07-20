@@ -40,10 +40,11 @@ $(function() {
   
   var email = '';
 	socket.on("application_info", function(data){
+    $("#app-content").empty();
     console.log(data.results.length);
     if (data.results.length > 0){
     for (var i in data.results){
-      $("#app-content").empty();
+      
       updateHTML(data.results[i]);
     }}
 		

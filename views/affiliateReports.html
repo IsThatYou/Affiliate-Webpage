@@ -39,7 +39,6 @@
                   <li><a href="#">Seasonal</a></li>
                 </ul>
               </li>
-              <li><a href="#gettingstarted">Tools</a></li>
               <li><a href="#camp">Campaigns</a></li>
               <li><a href="#tools">Tools</a></li>
               <li><a href="#about">About</a></li>
@@ -53,11 +52,6 @@
         <div class="container">
           <div class="page-header">
             <h2>Reports</h2>
-            <div class="collapse" id="campaignDescription">
-              <div class="well">
-                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-              </div>
-            </div>
           </div>
           <div class="content">
             <div class="firstArea panel panel-default">
@@ -65,9 +59,9 @@
                 <div class="col-xs-12 padding" style="width:20%">
                   <div class="input-daterange input-group" id="datepicker">
                     <span class="input-group-addon">From</span>
-                    <input type="date" class="input-sm form-control" name="start" />
+                    <input type="date" class="input-sm form-control" id="start" name="start"/>
                     <span class="input-group-addon">To</span>
-                    <input type="date" class="input-sm form-control" name="end" />
+                    <input type="date" class="input-sm form-control" name="end" id="end" />
                   </div>
                 </div>
               </div>
@@ -75,15 +69,15 @@
                 <div class="col-xs-6 padding">
                   <div class="checkbox">
                     <label>
-                      <input type="checkbox">Show Sub IDs
+                      <input type="checkbox" id="showSubIDs">Show Sub IDs
                     </label>
                   </div>
                   <div class="checkbox">
                     <label>
-                      <input type="checkbox">Actions Only
+                      <input type="checkbox" id="actionsOnly">Actions Only
                     </label>
                   </div>
-                  <a class="btn btn-warning btn-sm btn-block" href="#" style="width:30%;" role="button">Update Report</a>
+                  <a class="btn btn-warning btn-sm btn-block" href="#" style="width:70%;" role="button" id="updateReportButton">Update Report</a>
                 </div>
               </div>
             </div>
@@ -198,14 +192,14 @@
                   <th>TOTAL</th>
                   <th></th>
                   <th></th>
-                  <th>2100</th>
+                  <th id="totalClicks"></th>
                   <th></th>
-                  <th>231</th>
-                  <th>$206</th>
+                  <th id="totalActions"></th>
+                  <th id="totalCPA"></th>
                   <th></th>
                   <th></th>
                   <th></th>
-                  <th>$10545</th>
+                  <th id="totalAmount"></th>
                   <th></th>
                 </tr>
                 </tfooter>
@@ -230,7 +224,7 @@
     }
     });
     });</script>
-    <script src="js/javascript.js"></script>
+    <script src="js/loadReports.js"></script>
     <script>
     $('.navbar .dropdown').hover(function() {
     $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);

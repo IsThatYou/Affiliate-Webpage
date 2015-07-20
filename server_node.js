@@ -1,4 +1,4 @@
-
+// *Mysql
 var mysql = require('mysql');
 
 var HOST = '205.178.146.115';
@@ -18,17 +18,21 @@ var pool = mysql.createPool({
 
 
 
-
+// *Socket.io
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
+
 var bodyParser = require('body-parser');
 var path = require("path");
 
-console.log("express working fine");
+var morgan = require('morgan');
+var cookieParser = require('cookie-parser');
+
+app.use(morgan('dev'));
+//app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: false}));
-//app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/views'));
 app.get('/',function(req,res){
@@ -72,6 +76,7 @@ function request_fr_mysql(){
   	});
   	return finall;
 }
+//*Emailjs
 var email = require('emailjs');
 io.on("connection", function(socket){
 	console.log("socket connected...");
@@ -95,6 +100,7 @@ io.on("connection", function(socket){
 				socket.emit("application_info", {results:results});
 		    	
 	    	}
+	    	connection.release();
 	    // Don't use the connection here, it has been returned to the pool.
 	 	 });
 	  	});
@@ -112,6 +118,7 @@ io.on("connection", function(socket){
 				}
 				if (results.length > 0){
 					console.log("ID:" + id.ID + "has been approved");
+
 				}
 				
 			});
@@ -123,20 +130,20 @@ io.on("connection", function(socket){
 				if (results.length > 0){
 					console.log(results[0].Email);
 					var to = results[0].Email;
-					var from = 'example@gmail.com';
+					var from = 'Affiliate_test@cminyc.com';
 					var emailserver = email.server.connect({
-					   user:    "username", 
-					   password:"password", 
+					   user:    "Affiliate_test@cminyc.com", 
+					   password:"affiliate2015%", 
 					   // the host needs to be setup SMTP
-					   host:    "http://localhost", 
+					   host:    "smtp.cminyc.com", 
 					   ssl:     false
 					});
 
 					emailserver.send({
-					   text:    "i hope this works", 
+					   text:    "approved", 
 					   from:    from,
 					   //to
-					   to:      "me <jwang@cminyc.com>, another <junlinwang18@gmail.com>",
+					   to:      "me <jwang@cminyc.com>",
 					   cc:      "",
 					   subject: "testing emailjs"
 					}, function(err, message) { console.log(err || message); });
@@ -168,19 +175,19 @@ io.on("connection", function(socket){
 				if (results.length > 0){
 					console.log(results[0].Email);
 					var to = results[0].Email;
-					var from = 'example@gmail.com';
+					var from = 'Affiliate_test@cminyc.com';
 					var emailserver = email.server.connect({
-					   user:    "username", 
-					   password:"password", 
+					   user:    "Affiliate_test@cminyc.com", 
+					   password:"affiliate2015%", 
 					   // the host needs to be setup SMTP
-					   host:    "http://localhost", 
+					   host:    "smtp.cminyc.com", 
 					   ssl:     false
 					});
 
 					emailserver.send({
-					   text:    "i hope this works", 
+					   text:    "denied", 
 					   from:    from, 
-					   to:      "me <jwang@cminyc.com>, another <junlinwang18@gmail.com>",
+					   to:      "me <jwang@cminyc.com>",
 					   cc:      "",
 					   subject: "testing emailjs"
 					}, function(err, message) { console.log(err || message); });
@@ -230,47 +237,44 @@ io.on("connection", function(socket){
 
 
 app.get('/approve',function(req,res){
-	//add sign up authention
-	/*
-	sql = "SELECT First_Name, Last_Name, SSN_TAX_ID, Site_URL1, Site_Category1," +
-	"Address1, City, State, State2, Country, Zip, Phone FROM client_info " +
-	"WHERE approved = 0;";
-	pool.getConnection(function(err, connection) {
-  		// Use the connection
-  		connection.query(sql, function selectCb(err, results, fields) {
-  		if (err){
-  			console.log(err.message);
-  		}
-    	// And done with the connection.
-    	if (results.length > 0){
 
-	    	console.log("sent");
-	    	console.log(results[0].First_Name);
-	    	connection.release();
-    	}
-    	// Don't use the connection here, it has been returned to the pool.
- 	 });
-  	});
-  	*/
-  	
   res.sendFile("views/affiliateApproval.html", {root:__dirname});
+
 });
 
+// *Passport
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var flash    = require('connect-flash');
+var session  = require('express-session');
+var bcrypt = require('bcrypt-nodejs');
+
+
+app.use(session({
+	secret: 'vidyapathaisalwaysrunning',
+	resave: true,
+	saveUninitialized: true
+ } )); // session secret
+app.use(passport.initialize());
+app.use(passport.session()); // persistent login sessions
+app.use(flash()); 
+
+
+
+
 app.get('/login', function(req, res, err){
+	res.sendFile("views/affiliateLogin.html", {root: __dirname});
+});
+app.post('/login', function(req, res, err){
 	//
+	console.log("hello");
 	res.sendFile("views/affiliateLinks.html", {root: __dirname});
+
 });
 
 
 //connection.connect();
 app.post('/signup',function(req, res, err){
-	console.log('urf');
-	/*if (err){
-		//res.sendFile("views/Signup_Application.html", {root:__dirname});
-		console.log(err);
-		next(err);
-	}
-	else{*/
 	var proparray = [];
 	for (var prop in req.body){
 		proparray.push(prop);
@@ -282,111 +286,139 @@ app.post('/signup',function(req, res, err){
 		}
 
 	}
-	
+	sql0 = "SELECT * FROM client_info WHERE Email = '" + req.body[proparray[8]] + "';";
+	console.log('step1');
+	pool.getConnection(function(err, connection){
+		console.log('step2');
+		connection.query(sql0, function selectCb(err, results, fields){
+			console.log('step3');
+			if (err){
+				console.log('step4');
+            	console.log("ERR:" + err);
+            }
+            if (results.length) {
+            	console.log('step5');
+                req.flash('signupMessage', 'That email is already taken.');
+            } else {
+                // if there is no user with that username
+                // create the user
+           
+				console.log('urf');
+				/*if (err){
+					//res.sendFile("views/Signup_Application.html", {root:__dirname});
+					console.log(err);
+					next(err);
+				}
+				else{*/
 
-	console.log('e');
-	var info = "INSERT INTO client_info" + 
-	"(First_Name," +
-	"Last_Name," +
-	"Password," +
-	"Company," + 
-	"Checks_To," + 
-	"SSN_TAX_ID," +
-	"Payment_Threshhold," + 
-	"Email," + 
-	"Phone," + 
-	"Address1," + 
-	"Address2," + 
-	"City," + 
-	"State," +
-	"State2," +
-	"Country," + 
-	"Zip," + 
-	"AIM," + 
-	"Site_URL1," + 
-	"Alexa_Ranking1," + 
-	"Site_URL2," + 
-	"Alexa_Ranking2," + 
-	"Site_URL3," + 
-	"Alexa_Ranking3," + 
-	"Site_URL4," + 
-	"Alexa_Ranking4," + 
-	"CPA_Affiliate_Marketing," + 
-	"Site_Category1," + 
-	"Site_Category2," + 
-	"Site_Category3," + 
-	"Unique_Visitors_PM," +
-	"Source_of_Site_Analytics," + 
-	"CP_PPC," +
-	"CP_Monthly_Speed," +
-	"CP_SEO," +
-	"CP_Incentives," +
-	"CP_Email," +
-	"CP_Other," + 
-	"News_Letter," + 
-	"Num_Subs," + 
-	"Solo_Email," + 
-	"Sin_Dou_Optin," + 
-	"Mailing_Freq," + 
-	"Time_Record)" +
-	" VALUES " +
-	"(" + 
-	"'" + req.body[proparray[1]] + "'," +
-	"'" + req.body[proparray[2]] + "'," +
-	"'" + req.body[proparray[3]] + "',"+
-	"'" + req.body[proparray[4]] + "'," +
-	"'" + req.body[proparray[5]] + "'," + 
-	"'" + req.body[proparray[6]] + "'," +
-	"'" + req.body[proparray[7]] + "'," +
-	"'" + req.body[proparray[8]] + "'," + 
-	"'" + req.body[proparray[9]] + "'," + 
-	"'" + req.body[proparray[10]] + "'," +
-	"'" + req.body[proparray[11]] + "'," + 
-	"'" + req.body[proparray[12]] + "'," + 
-	"'" + req.body[proparray[13]] + "'," +
-	"'" + req.body[proparray[14]] + "'," + 
-	"'" + req.body[proparray[15]] + "'," +
-	"'" + req.body[proparray[16]] + "'," + 
-	"'" + req.body[proparray[17]] + "'," + 
-	"'" + req.body[proparray[18]] + "'," + 
-	"'" + req.body[proparray[19]] + "'," + 
-	"'" + req.body[proparray[20]] + "'," +
-	"'" + req.body[proparray[21]] + "'," +
-	"'" + req.body[proparray[22]] + "'," +
-	"'" + req.body[proparray[23]] + "'," +
-	"'" + req.body[proparray[24]] + "'," +
-	"'" + req.body[proparray[25]] + "'," +
-	"'" + req.body[proparray[26]] + "'," +
-	"'" + req.body[proparray[27]] + "'," + 
-	"'" + req.body[proparray[28]] + "'," + 
-	"'" + req.body[proparray[29]] + "'," + 
-	"'" + req.body[proparray[30]] + "'," +
-	"'" + req.body[proparray[31]] + "'," +
-	"'" + req.body[proparray[32]] + "'," + 
-	"'" + req.body[proparray[33]] + "'," + 
-	"'" + req.body[proparray[34]] + "'," +
-	"'" + req.body[proparray[35]] + "'," +
-	"'" + req.body[proparray[36]] + "'," + 
-	"'" + req.body[proparray[37]] + "'," +
-	"'" + req.body[proparray[38]] + "'," +
-	"'" + req.body[proparray[39]] + "'," + 
-	"'" + req.body[proparray[40]] + "'," +
-	"'" + req.body[proparray[41]] + "'," +
-	"'" + req.body[proparray[42]] + "'," +
-	"'" + req.body[proparray[43]] + 
-	"')" 
+				console.log('e');
+				var info = "INSERT INTO client_info" + 
+				"(First_Name," +
+				"Last_Name," +
+				"Password," +
+				"Company," + 
+				"Checks_To," + 
+				"SSN_TAX_ID," +
+				"Payment_Threshhold," + 
+				"Email," + 
+				"Phone," + 
+				"Address1," + 
+				"Address2," + 
+				"City," + 
+				"State," +
+				"State2," +
+				"Country," + 
+				"Zip," + 
+				"AIM," + 
+				"Site_URL1," + 
+				"Alexa_Ranking1," + 
+				"Site_URL2," + 
+				"Alexa_Ranking2," + 
+				"Site_URL3," + 
+				"Alexa_Ranking3," + 
+				"Site_URL4," + 
+				"Alexa_Ranking4," + 
+				"CPA_Affiliate_Marketing," + 
+				"Site_Category1," + 
+				"Site_Category2," + 
+				"Site_Category3," + 
+				"Unique_Visitors_PM," +
+				"Source_of_Site_Analytics," + 
+				"CP_PPC," +
+				"CP_Monthly_Speed," +
+				"CP_SEO," +
+				"CP_Incentives," +
+				"CP_Email," +
+				"CP_Other," + 
+				"News_Letter," + 
+				"Num_Subs," + 
+				"Solo_Email," + 
+				"Sin_Dou_Optin," + 
+				"Mailing_Freq," + 
+				"Time_Record)" +
+				" VALUES " +
+				"(" + 
+				"'" + req.body[proparray[1]] + "'," +
+				"'" + req.body[proparray[2]] + "'," +
+				"'" + bcrypt.hashSync(req.body[proparray[3]], null, null) + "',"+
+				"'" + req.body[proparray[4]] + "'," +
+				"'" + req.body[proparray[5]] + "'," + 
+				"'" + req.body[proparray[6]] + "'," +
+				"'" + req.body[proparray[7]] + "'," +
+				"'" + req.body[proparray[8]] + "'," + 
+				"'" + req.body[proparray[9]] + "'," + 
+				"'" + req.body[proparray[10]] + "'," +
+				"'" + req.body[proparray[11]] + "'," + 
+				"'" + req.body[proparray[12]] + "'," + 
+				"'" + req.body[proparray[13]] + "'," +
+				"'" + req.body[proparray[14]] + "'," + 
+				"'" + req.body[proparray[15]] + "'," +
+				"'" + req.body[proparray[16]] + "'," + 
+				"'" + req.body[proparray[17]] + "'," + 
+				"'" + req.body[proparray[18]] + "'," + 
+				"'" + req.body[proparray[19]] + "'," + 
+				"'" + req.body[proparray[20]] + "'," +
+				"'" + req.body[proparray[21]] + "'," +
+				"'" + req.body[proparray[22]] + "'," +
+				"'" + req.body[proparray[23]] + "'," +
+				"'" + req.body[proparray[24]] + "'," +
+				"'" + req.body[proparray[25]] + "'," +
+				"'" + req.body[proparray[26]] + "'," +
+				"'" + req.body[proparray[27]] + "'," + 
+				"'" + req.body[proparray[28]] + "'," + 
+				"'" + req.body[proparray[29]] + "'," + 
+				"'" + req.body[proparray[30]] + "'," +
+				"'" + req.body[proparray[31]] + "'," +
+				"'" + req.body[proparray[32]] + "'," + 
+				"'" + req.body[proparray[33]] + "'," + 
+				"'" + req.body[proparray[34]] + "'," +
+				"'" + req.body[proparray[35]] + "'," +
+				"'" + req.body[proparray[36]] + "'," + 
+				"'" + req.body[proparray[37]] + "'," +
+				"'" + req.body[proparray[38]] + "'," +
+				"'" + req.body[proparray[39]] + "'," + 
+				"'" + req.body[proparray[40]] + "'," +
+				"'" + req.body[proparray[41]] + "'," +
+				"'" + req.body[proparray[42]] + "'," +
+				"'" + req.body[proparray[43]] + 
+				"')" 
 
-	console.log(info);
-	pool.getConnection(function(err, connection) {
-  	// Use the connection
-  		connection.query(info, function(err, rows) {
-    // And done with the connection.
-    	connection.release();
-    // Don't use the connection here, it has been returned to the pool.
-  });
+				console.log(info);
+				
+			  	// Use the connection
+			  	connection.query(info, function(err, rows) {
+			    // And done with the connection.
+			    connection.release();
+			    // Don't use the connection here, it has been returned to the pool.
+			  });
+		
+				
+				res.writeHead(301,
+			  	{Location: 'affiliateLogin.html'});
+			  	res.end();
+		}
+    });
 });
-	
-	res.sendFile("views/affiliateLogin.html", {root: __dirname});
 
 //}
 });

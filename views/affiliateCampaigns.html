@@ -1,0 +1,164 @@
+<html>
+  <head>
+    <title>Affiliate Website</title>
+    <link href="css/styles.css" rel="stylesheet" type="text/css">
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js
+    "></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <!-- Wrap all page content here -->
+    <div id="wrap">
+      
+      <!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Tarsus Media</a>
+          </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Offers<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">All Offers</a></li>
+                  <li><a href="#">Offers by Category</a></li>
+                  <li><a href="#">Search All Offers</a></li>
+                  <li><a href="#">Exclusives</a></li>
+                  <li><a href="#">Search Offers</a></li>
+                  <li><a href="#">Email and Zip Submits</a></li>
+                  <li><a href="#">Seasonal</a></li>
+                </ul>
+              </li>
+              <li><a href="#camp">Campaigns</a></li>
+              <li><a href="#tools">Tools</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+        
+        <!-- Begin page content -->
+        <div class="container">
+          <div class="page-header">
+            <h2 id="campaignAmount">Campaigns</h2>
+            <p>Click on any Campaign Name to obtain sales tools/linking methods for that Campaign.</p>
+          </div>
+        
+          <div class="paddingTop">
+            <div class="firstArea panel panel-default">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Update</th>
+                    <th>Start Date</th>
+                    <th>Short Description</th>
+                    <th>Exp</th>
+                    <th>Payout</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0001</td>
+                    <td>Campaign 1</td>
+                    <td>1</td>
+                    <td>100</td>
+                    <td>-</td>
+                    <td>11</td>
+                    <td>$10</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td>0002</td>
+                    <td>Campaign 2</td>
+                    <td>2</td>
+                    <td>200</td>
+                    <td>-</td>
+                    <td>22</td>
+                    <td>$42</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td>0003</td>
+                    <td>Campaign 3</td>
+                    <td>3</td>
+                    <td>300</td>
+                    <td>-</td>
+                    <td>33</td>
+                    <td>$11</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td>0004</td>
+                    <td>Campaign 4</td>
+                    <td>4</td>
+                    <td>400</td>
+                    <td>-</td>
+                    <td>44</td>
+                    <td>$54</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td>0005</td>
+                    <td>Campaign 5</td>
+                    <td>5</td>
+                    <td>500</td>
+                    <td>-</td>
+                    <td>55</td>
+                    <td>$75</td>
+                    <td>-</td>
+                  </tr>
+                  <tr>
+                    <td>0006</td>
+                    <td>Campaign 6</td>
+                    <td>6</td>
+                    <td>600</td>
+                    <td>-</td>
+                    <td>66</td>
+                    <td>$14</td>
+                    <td>-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="footer">
+      <div class="">
+        <p class="text-muted credit">Footer <a href="#">Footer</a></p>
+      </div>
+    </div>
+    <script>$(function () {
+    $('#accordion').on('shown.bs.collapse', function (e) {
+    var offset = $('.panel.panel-default > .panel-collapse.in').offset();
+    if(offset) {
+    $('html,body').animate({
+    scrollTop: $('.panel-title a').offset().top -50
+    }, 500);
+    }
+    });
+    });</script>
+    <script src="js/loadCampaigns.js"></script>
+    <script>
+    $('.navbar .dropdown').hover(function() {
+    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+    }, function() {
+    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
+    });</script>
+  </body>
+</html>
