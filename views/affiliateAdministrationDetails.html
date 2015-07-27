@@ -8,10 +8,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js
     "></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script>
-    function login(form){
-      form.submit();
-    }</script>
   </head>
   <body>
     <!-- Wrap all page content here -->
@@ -54,29 +50,32 @@
         
         <!-- Begin page content -->
         <div class="container">
+          <div class="page-header">
+            <h2>Details</h2>
+            <p id="detailsText"></p>
+          </div>
           
-          <div class="content login-paddingTop">
+          <div class="paddingTop">
             <div class="firstArea panel panel-default">
-              <div class="row">
-                <div class="col-xs-12 padding">
-                  <div class="container">
-                    <div class="row">
-                      <div class="col-sm-6 col-md-4 col-md-offset-4">
-                        <h1 class="text-center">Affiliate Login</h1>
-
-                        <div>
-                          <form class="form-signin" ACTION="login" METHOD="Post">
-                            <input type="text" name='email' class="form-control" placeholder="Email" required autofocus>
-                            <input type="password" name='password' class="form-control" placeholder="Password" required>
-                            <button class="btn btn-lg btn-warning btn-block" type="submit" ONCLICK="login(this.form)">
-                            Login</button>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Date Stamp</th>
+                    <th>Banner ID</th>
+                    <th>IP Address</th>
+                    <th>Referrer</th>
+                    <th>Cookie ID</th>
+                    <th>Publisher Optional Info</th>
+                    <th>Advertiser Optional Info</th>
+                    <th>Deploy ID</th>
+                    <th>Landing Page ID</th>
+                    <th>Pool ID</th>
+                    <th>Remove?</th>
+                  </tr>
+                </thead>
+                <tbody id="tableForDetails">
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -97,10 +96,7 @@
     }
     });
     });</script>
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/affiliateLogin.js"></script>
-    <script src="/js/affiliateLogin2.js"></script>
+    <script src="js/loadAdministration.js"></script>
     <script>
     $('.navbar .dropdown').hover(function() {
     $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);

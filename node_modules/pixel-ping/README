@@ -1,0 +1,19 @@
+=
+   ___ _         _   ___ _           
+  | _ (_)_ _____| | | _ (_)_ _  __ _ 
+  |  _/ \ \ / -_) | |  _/ | ' \/ _` |
+  |_| |_/_\_\___|_| |_| |_|_||_\__, |
+                               |___/
+  
+  o      .   _______ _______
+   \_ 0     /______//______/|   @_o
+     /\_,  /______//______/     /\
+    | \    |      ||      |     / |
+    
+  
+  Pixel Ping is a minimalist pixel tracker, written in CoffeeScript for Node.js.
+  It's useful when you want to keep track of page hits, but don't want to inject
+  something heavy like Google Analytics. It has no dependencies other than Node.
+  
+  For installation and usage instructions, see:
+  http://documentcloud.github.com/pixel-ping

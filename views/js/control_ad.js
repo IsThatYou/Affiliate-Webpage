@@ -1,22 +1,4 @@
-$(function() {
-	var socket = io('http://127.0.0.1:3000/');
-	socket.on("afsignup", function(data){
-		var message = data.message;
-		var warning = $("#warning1");
-		if (warning){
-			warning.remove();
-		}
-		$(".headline-dark").before('<div class="alert alert-danger" id = "warning1" >' + message + '</div>');
-		$(".headline-dark").before('<div class="alert alert-danger" id = "warning1" >' + message + '</div>');
-		
-	});
-	socket.on("afsignup_delete", function(){
-		$("#warning1").remove();
-	});
-});
-
-	function signup(form){
-
+function signup(form){
 		console.log(form);
 		if (form.name.value == "")
 	  { alert("Please include your first name!"); form.name.focus(); return; }
@@ -27,12 +9,6 @@ $(function() {
 	  if (form.password.value == "")
 	  { alert("Please choose a password!"); form.password.focus(); return; }
 	  
-	  if (form.payto.value == "")
-	  { alert("Please include checks payable to!"); form.payto.focus(); return; }
-	  
-	  if (form.taxid.value == "")
-	  { alert("Please include Tax ID/SSN!"); form.taxid.focus(); return; }
- 
 	  if (form.email.value == "")
 	  { alert("Please include your email address!"); form.email.focus(); return; }
 	  
@@ -69,7 +45,7 @@ $(function() {
 //	  if (form.site_desc.value == "")
 //	  { alert("Please include how you will promote our campaigns!"); form.site_desc.focus(); return; }
  
-	  if ((form.chksite_desc1.checked == false) && (form.chksite_desc2.checked == false) && (form.chksite_desc3.checked == false) && (form.chksite_desc4.checked == false) && (form.monthlyspend.checked == false) && (form.site_desc.value == ""))
+	  if ((form.affiliate_marketing.checked == false) && (form.media_buying.checked == false) && (form.campaign_dev.checked == false) && (form.lead_gene.checked == false) && (form.SEO.checked == false) && (form.overview.value == ""))
 	  { alert("Please include how you will promote our campaigns!"); form.chksite_desc1.focus(); return; }
  
 	  if (form.agree.checked == false)
@@ -77,5 +53,3 @@ $(function() {
  
 	  form.submit();
 	}
-	//});
-	//});
