@@ -1,3 +1,22 @@
+$(function() {
+	var socket = io('http://127.0.0.1:3000/');
+	socket.on("adsignup", function(data){
+		var message = data.message;
+		var warning = $("#warning1");
+		if (warning){
+			warning.remove();
+		}
+		$(".headline-dark").before('<div class="alert alert-danger" id = "warning1" >' + message + '</div>');
+		$(".headline-dark").before('<div class="alert alert-danger" id = "warning1" >' + message + '</div>');
+		socket.emit("disconnect-signup-ad");
+	});
+	socket.on("adsignup_delete", function(){
+		$("#warning1").remove();
+		socket.emit("disconnect-signup-ad_delete");
+	});
+});
+
+
 function signup(form){
 		console.log(form);
 		if (form.name.value == "")

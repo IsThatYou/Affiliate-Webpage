@@ -2,9 +2,7 @@ $(function() {
   var socket = io("http://127.0.0.1:3000/");
   socket.emit("application ad info");
   $("#app-content").append("There seems to be nothing left.");
-  //var $button = $('.btn');
-  //use both empty and remove when removing DOM
-  //Haven't been tested yet
+
   function updateHTML(data){
     
     $("#app-content").append("<div class='firstArea panel panel-default' id='wrap" + data.Assigned_ID + "'>" + 

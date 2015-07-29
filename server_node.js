@@ -9,7 +9,7 @@ var DATABASE = 'affiliate_web_database';
 var TABLE = 'requests_info';
 
 var pool = mysql.createPool({
-	connectionlimit:10,
+	connectionlimit:2,
 	host: HOST,
 	database: DATABASE,
 	user: MYSQL_USER,
@@ -18,7 +18,8 @@ var pool = mysql.createPool({
 
 
 
-// *Socket.io
+///------ *Socket.io & Emailjs -- a approval process with automated email sending ------///
+
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
@@ -38,16 +39,6 @@ app.use(express.static(__dirname + '/views'));
 app.get('/',function(req,res){
   res.sendFile("views/Signup_Application.html", {root:__dirname});
 });
-
-
-
-
-
-
-
-
-
-
 
 
 //*Emailjs
@@ -204,6 +195,7 @@ io.on("connection", function(socket){
 	socket.on("deny", function(id){
 		console.log("denying request sent");
 		sql = "UPDATE client_info SET approved = 2 WHERE Assigned_ID = " + id.ID + ";";
+		sql2 = "SELECT Email FROM client_info WHERE Assigned_ID = " + id.ID + ";";
 		pool.getConnection(function(err, connection){
 			connection.query(sql, function selectCb(err, results, fields) {
 				if (err){
@@ -249,6 +241,7 @@ io.on("connection", function(socket){
 	socket.on("deny2", function(id){
 		console.log("denying request sent");
 		sql = "UPDATE advertiser_info SET approved = 2 WHERE Assigned_ID = " + id.ID + ";";
+		sql2 = "SELECT Email FROM advertiser_info WHERE Assigned_ID = " + id.ID + ";";
 		pool.getConnection(function(err, connection){
 			connection.query(sql, function selectCb(err, results, fields) {
 				if (err){
@@ -325,19 +318,16 @@ io.on("connection", function(socket){
 
 
 
-
+///------ *Passport -- a signup, login function ------///
 
 app.get('/approve',function(req,res){
-
   res.sendFile("views/affiliateApproval.html", {root:__dirname});
-
 });
+
 app.get('/approve_ad',function(req,res){
-
   res.sendFile("views/advertiserApproval.html", {root:__dirname});
-
 });
-// *Passport
+
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var flash    = require('connect-flash');
@@ -353,15 +343,33 @@ app.use(session({
 
 
 passport.serializeUser(function(user, done) {
+	// if the user is an advertiser, add 'ad' before the ID to differentiate it from affiliates
+
+	console.log('identity: ' + user.Identity);
         done(null, user.Assigned_ID);
     });
+
+//TEST
 passport.deserializeUser(function(id, done) {
+	console.log('test: ' + id.Identity);
+	console.log(!id.Identity);
+	if (id.Identity != undefined){
+		pool.getConnection(function(err, connection){
+	    	connection.query("SELECT * FROM advertiser_info WHERE Assigned_ID = ? ",[id], function(err, rows){
+	        done(err, rows[0]);
+	        connection.release();
+	    	});
+    	});
+	} else{
 	pool.getConnection(function(err, connection){
     	connection.query("SELECT * FROM client_info WHERE Assigned_ID = ? ",[id], function(err, rows){
         done(err, rows[0]);
+        connection.release();
+    		});
     	});
-    });
+	}
 });
+
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); 
@@ -369,33 +377,152 @@ app.use(flash());
 
 
 
+
+//// Affiliate Login
 app.get('/login', function(req, res, err){
+	var bottle = req.flash('loginMessage');
+	console.log(bottle[0]);
+	if (bottle[0] != undefined){
+		
+		io.on("connection", function(socket){
+			socket.emit("aflogin", {message: bottle});
+			socket.on("disconnect1", function(){
+				socket.disconnect();
+			});
+		});
+
+	}
+	
+	io.on("connection", function(socket){
+		socket.emit("aflogin_delete");
+		socket.on("disconnect1_delete", function(){
+			socket.disconnect();
+		}); ///////////do this for every login/signup
+
+		
+	});
+	io.sockets.emit("aflogin_delete", {message: bottle});
 	res.sendFile("views/affiliateLogin.html", {root: __dirname});
 });
-app.post('/login', function(req, res, err){
-	//
-	console.log("hello");
-	res.sendFile("views/affiliateLogin.html", {root: __dirname});
 
+passport.use(
+    'local-login',
+    new LocalStrategy({
+        // by default, local strategy uses username and password, we will override with email
+        usernameField : 'email',
+        passwordField : 'password',
+        passReqToCallback : true // allows us to pass back the entire request to the callback
+    },
+    function(req, username, password, done) { // callback with email and password from our form
+        pool.getConnection(function(err, connection){
+	        connection.query("SELECT * FROM client_info WHERE Email = ?",[username], function(err, rows){
+	            if (err)
+	                return done(err);
+	            if (!rows.length || !bcrypt.compareSync(password, rows[0].Password)){
+	                return done(null, false, req.flash('loginMessage', 'Oops! Wrong Password or Email.')); // create the loginMessage and save it to session as flashdata
+	            }
+	            if (rows[0].approved == 0){
+	            	return done(null, false, req.flash('loginMessage', 'Account Pending'));
+	            }
+	            if (rows[0].approved == 2){
+	            	return done(null, false, req.flash('loginMessage', 'Account Denied'));
+	            }
+	            // if the user is found but the password is wrong
+	            
+	            // all is well, return successful user
+	            return done(null, rows[0]);
+	            connection.release();
+	        });
+        });
+    })
+);
+
+app.post('/login', passport.authenticate('local-login', {
+	successRedirect: '/profile',
+	failureRedirect: '/login',
+	failureFlash: true
+}));
+
+////  Advertiser Login
+
+app.get('/login_ad', function(req, res, err){
+	var bottle = req.flash('login_ad_Message');
+	console.log(bottle[0]);
+	if (bottle[0] != undefined){
+		io.on("connection", function(socket){
+			socket.emit("adlogin", {message: bottle});
+			socket.on("disconnect2", function(){
+				socket.disconnect();
+			});
+		});
+	}
+	io.on("connection", function(socket){
+		socket.emit("adlogin_delete");
+		socket.on("disconnect2_delete", function(){
+				socket.disconnect();
+			});
+	});
+	res.sendFile("views/advertiserLogin.html", {root: __dirname});
 });
 
-// Go to the affiliate signup page
+passport.use(
+    'local-login-ad',
+    new LocalStrategy({
+        // by default, local strategy uses username and password, we will override with email
+        usernameField : 'email',
+        passwordField : 'password',
+        passReqToCallback : true // allows us to pass back the entire request to the callback
+    },
+    function(req, username, password, done) { // callback with email and password from our form
+        pool.getConnection(function(err, connection){
+	        connection.query("SELECT * FROM advertiser_info WHERE Email = ?",[username], function(err, rows){
+	            if (err)
+	                return done(err);
+	            if (!rows.length || !bcrypt.compareSync(password, rows[0].Password)){
+	                return done(null, false, req.flash('login_ad_Message', 'Oops! Wrong Password or Email.')); // create the loginMessage and save it to session as flashdata
+	            }
+	            if (rows[0].approved == 0){
+	            	return done(null, false, req.flash('login_ad_Message', 'Account Pending'));
+	            }
+	            if (rows[0].approved == 2){
+	            	return done(null, false, req.flash('login_ad_Message', 'Account Denied'));
+	            }
+	            // if the user is found but the password is wrong
+	            
+	            // all is well, return successful user
+	            return done(null, rows[0]);
+	            connection.release();
+	        });
+        });
+    })
+);
+
+app.post('/login_ad', passport.authenticate('local-login-ad', {
+	successRedirect: '/profile_ad',
+	failureRedirect: '/login_ad',
+	failureFlash: true
+}));
+
+////  Affiliate Signup
 app.get('/signup', function(req, res, err){
 	var bottle = req.flash('signupMessage');
 	console.log(bottle[0]);
 	if (bottle[0] != undefined){
 		io.on("connection", function(socket){
 			socket.emit("afsignup", {message: bottle});
-			
+			socket.on("disconnect-signup-af", function(){
+				socket.disconnect();
+			});
 		});
 	}
 	io.on("connection", function(socket){
 		socket.emit("afsignup_delete");
-
+		socket.on("disconnect-signup-af_delete", function(){
+				socket.disconnect();
+			});
 	});
 	res.sendFile("views/Signup_Application.html", {root: __dirname});
 });
-// Submit affiliate sign up
 
 
 passport.use(
@@ -428,8 +555,6 @@ passport.use(
 	                } else {
 	                    // if there is no user with that username
 	                    // create the user
-
-						console.log('e');
 						var info = "INSERT INTO client_info" + 
 						"(First_Name," +
 						"Last_Name," +
@@ -524,20 +649,20 @@ passport.use(
 						console.log(info);
 						
 					  	// Use the connection
-					 	//connection.release();
+
 					  	connection.query(info, function(err, fields) {
-						    // And done with the connection.
 						    console.log('did it:');
 						 
 						    sql1 = "SELECT * FROM client_info WHERE Email = ?"
 						    connection.query(sql1, [username], function(err, rows){
 						    	console.log(rows[0]);
 						    	return done(null, rows[0]);
-						    	connection.release();
+						    	
 						    });
 						    
 						    // Don't use the connection here, it has been returned to the pool.
 					  	});
+					  	connection.release();
 
 	                }
 	            });
@@ -549,125 +674,132 @@ app.post('/signup', passport.authenticate('local-signup', {
 		failureRedirect : '/signup', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 }));
-//// advertiser sign up
-app.get("/signup_ad", function(req, res, err){
-	res.sendFile("views/advertiserSignup.html", {root:__dirname});
-});
-app.post("/signup_ad", function(req, res, err){
-	var proparray = [];
-	for (var prop in req.body){
-		proparray.push(prop);
+
+
+//// Advertiser Signup
+
+app.get('/signup_ad', function(req, res, err){
+	var bottle = req.flash('signup_ad_Message');
+	console.log(bottle[0]);
+	if (bottle[0] != undefined){
+		io.on("connection", function(socket){
+			socket.emit("adsignup", {message: bottle});
+			socket.on("disconnect-signup-ad", function(){
+				socket.disconnect();
+			});
+		});
 	}
-	for (var i = 0; i < proparray.length; i++){
-		if (req.body[proparray[i]] == '' || req.body[proparray[i]] == 'http://' || req.body[proparray[i] == undefined]){
-			req.body[proparray[i]] = null;
-		}
-
-	}
-	sql0 = "SELECT * FROM advertiser_info WHERE Email = '" + req.body[proparray[5]] + "';";
-	pool.getConnection(function(err, connection){
-		connection.query(sql0, function selectCb(err, results, fields){
-			if (err){
-            	console.log("ERR:" + err);
-            }
-            if (results.length) {
-                req.flash('signupMessage', 'That email is already taken.');
-            } else {
-                // if there is no user with that username
-                // create the user
-
-				console.log('e');
-				var info = "INSERT INTO advertiser_info" + 
-				"(First_Name," +
-				"Last_Name," +
-				"Password," +
-				"Company," + 
-				"Email," + 
-				"Phone," + 
-				"Address," + 
-				"Address2," + 
-				"City," + 
-				"State," +
-				"State2," +
-				"Country," + 
-				"Zip," + 
-				"Affiliate_Marketing," + 
-				"Media_Buying," +
-				"Campaign_Dev," +
-				"Lead_Gene," +
-				"SEO," +
-				"Overview" + 
-				")" +
-				" VALUES " +
-				"(" + 
-				'"' + req.body[proparray[1]] + '",' +
-				'"' + req.body[proparray[2]] + '",' +
-				'"' + bcrypt.hashSync(req.body[proparray[3]], null, null) + '",' +
-				'"' + req.body[proparray[4]] + '",' +
-				'"' + req.body[proparray[5]] + '",' + 
-				'"' + req.body[proparray[6]] + '",' +
-				'"' + req.body[proparray[7]] + '",' +
-				'"' + req.body[proparray[8]] + '",' + 
-				'"' + req.body[proparray[9]] + '",' + 
-				'"' + req.body[proparray[10]] + '",' +
-				'"' + req.body[proparray[11]] + '",' + 
-				'"' + req.body[proparray[12]] + '",' + 
-				'"' + req.body[proparray[13]] + '",' +
-				'"' + req.body[proparray[14]] + '",' + 
-				'"' + req.body[proparray[15]] + '",' +
-				'"' + req.body[proparray[16]] + '",' + 
-				'"' + req.body[proparray[17]] + '",' + 
-				'"' + req.body[proparray[18]] + '",' + 
-				'"' + req.body[proparray[19]] + 
-				'");' 
-
-				console.log(info);
-				
-			  	// Use the connection
-			  	connection.query(info, function(err, rows) {
-			    // And done with the connection.
-			    console.log('did it');
-			    console.log(err);
-			    console.log(rows);
-			    connection.release();
-			    // Don't use the connection here, it has been returned to the pool.
-			  });
-		
-				
-				res.writeHead(301,
-			  	{Location: 'affiliateLogin.html'});
-			  	res.end();
-		}
-    });
+	io.on("connection", function(socket){
+		socket.emit("adsignup_delete");
+		socket.on("disconnect-signup-ad_delete", function(){
+				socket.disconnect();
+			});
+	});
+	res.sendFile("views/advertiserSignup.html", {root: __dirname});
 });
-	
-});
+
 passport.use(
-    'local-login',
-    new LocalStrategy({
-        // by default, local strategy uses username and password, we will override with email
-        usernameField : 'username',
-        passwordField : 'password',
-        passReqToCallback : true // allows us to pass back the entire request to the callback
-    },
-    function(req, username, password, done) { // callback with email and password from our form
-        connection.query("SELECT * FROM users WHERE username = ?",[username], function(err, rows){
-            if (err)
-                return done(err);
-            if (!rows.length) {
-                return done(null, false, req.flash('loginMessage', 'No user found.')); // req.flash is the way to set flashdata using connect-flash
-            }
+        'local-signup-ad',
+        new LocalStrategy({
+            // by default, local strategy uses username and password, we will override with email
+            usernameField : 'email',
+            passwordField : 'password',
+            passReqToCallback : true // allows us to pass back the entire request to the callback
+        },
+        function(req, username, password, done) {
+        	var proparray = [];
+			for (var prop in req.body){
+				proparray.push(prop);
+			}
+			console.log(proparray.length + 2);
+			for (var i = 0; i < proparray.length; i++){
+				if (req.body[proparray[i]] == '' || req.body[proparray[i]] == 'http://' || req.body[proparray[i] == undefined]){
+					req.body[proparray[i]] = null;
+				}
+			}
+            // find a user whose email is the same as the forms email
+            // we are checking to see if the user trying to login already exists
+            pool.getConnection(function(err, connection){
+	            connection.query("SELECT * FROM advertiser_info WHERE Email = ?",[username], function(err, rows) {
+	                if (err)
+	                    return done(err);
+	                if (rows.length) {
+	                    return done(null, false, req.flash('signup_ad_Message', 'That email is already registered.'));
+	                } else {
+	                    // if there is no user with that username
+	                    // create the user
 
-            // if the user is found but the password is wrong
-            if (!bcrypt.compareSync(password, rows[0].password))
-                return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
+						var info = "INSERT INTO advertiser_info" + 
+									"(First_Name," +
+									"Last_Name," +
+									"Password," +
+									"Company," + 
+									"Email," + 
+									"Phone," + 
+									"Address," + 
+									"Address2," + 
+									"City," + 
+									"State," +
+									"State2," +
+									"Country," + 
+									"Zip," + 
+									"Affiliate_Marketing," + 
+									"Media_Buying," +
+									"Campaign_Dev," +
+									"Lead_Gene," +
+									"SEO," +
+									"Overview" + 
+									")" +
+									" VALUES " +
+									"(" + 
+									'"' + req.body[proparray[1]] + '",' +
+									'"' + req.body[proparray[2]] + '",' +
+									'"' + bcrypt.hashSync(req.body[proparray[3]], null, null) + '",' +
+									'"' + req.body[proparray[4]] + '",' +
+									'"' + req.body[proparray[5]] + '",' + 
+									'"' + req.body[proparray[6]] + '",' +
+									'"' + req.body[proparray[7]] + '",' +
+									'"' + req.body[proparray[8]] + '",' + 
+									'"' + req.body[proparray[9]] + '",' + 
+									'"' + req.body[proparray[10]] + '",' +
+									'"' + req.body[proparray[11]] + '",' + 
+									'"' + req.body[proparray[12]] + '",' + 
+									'"' + req.body[proparray[13]] + '",' +
+									'"' + req.body[proparray[14]] + '",' + 
+									'"' + req.body[proparray[15]] + '",' +
+									'"' + req.body[proparray[16]] + '",' + 
+									'"' + req.body[proparray[17]] + '",' + 
+									'"' + req.body[proparray[18]] + '",' + 
+									'"' + req.body[proparray[19]] + 
+									'");' 
 
-            // all is well, return successful user
-            return done(null, rows[0]);
-        });
-    })
-);
+						console.log(info);
+						
+					  	// Use the connection
+					  	connection.query(info, function(err, fields) {
+						    // And done with the connection.
+						    console.log('did it:');
+						 
+						    sql1 = "SELECT * FROM advertiser_info WHERE Email = ?"
+						    connection.query(sql1, [username], function(err, rows){
+						    	console.log(rows[0]);
+						    	return done(null, rows[0]);
+						    	
+						    });
+						    
+					  	});
+					  	connection.release();
 
+	                }
+	            });
+			});
+		}));
+
+app.post('/signup_ad', passport.authenticate('local-signup-ad', {
+		successRedirect : '/login', // redirect to the secure profile section
+		failureRedirect : '/signup_ad', // redirect back to the signup page if there is an error
+		failureFlash : true // allow flash messages
+}));
 
 
 

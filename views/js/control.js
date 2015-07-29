@@ -8,10 +8,11 @@ $(function() {
 		}
 		$(".headline-dark").before('<div class="alert alert-danger" id = "warning1" >' + message + '</div>');
 		$(".headline-dark").before('<div class="alert alert-danger" id = "warning1" >' + message + '</div>');
-		
+		socket.emit("disconnect-signup-af");
 	});
 	socket.on("afsignup_delete", function(){
 		$("#warning1").remove();
+		socket.emit("disconect-signup-af_delete");
 	});
 });
 
