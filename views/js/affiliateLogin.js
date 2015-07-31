@@ -1,5 +1,5 @@
 $(function() {
-	var socket = io('http://127.0.0.1:3000/');
+	var socket = io('http://192.168.0.22:3000/');
 	socket.on("aflogin", function(data){
 		console.log('sssssssssssss');
 		var message = data.message;

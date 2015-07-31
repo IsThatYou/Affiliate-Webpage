@@ -18,7 +18,7 @@ var pool = mysql.createPool({
 
 
 
-///------ *Socket.io & Emailjs -- a approval process with automated email sending ------///
+///------------ *Socket.io & Emailjs - a approval process with automated email sending ----------///
 
 var express = require('express');
 var app = express();
@@ -287,6 +287,7 @@ io.on("connection", function(socket){
 
 });
 
+//------------------------------------------------------------------------------------------------//
 
 
 
@@ -299,26 +300,7 @@ io.on("connection", function(socket){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-///------ *Passport -- a signup, login function ------///
+///---------------------- *Passport -- a signup, login function ---------------------------///
 
 app.get('/approve',function(req,res){
   res.sendFile("views/affiliateApproval.html", {root:__dirname});
@@ -346,7 +328,7 @@ passport.serializeUser(function(user, done) {
 	// if the user is an advertiser, add 'ad' before the ID to differentiate it from affiliates
 
 	console.log('identity: ' + user.Identity);
-        done(null, user.Assigned_ID);
+    done(null, 86);
     });
 
 //TEST
@@ -373,8 +355,6 @@ passport.deserializeUser(function(id, done) {
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(flash()); 
-
-
 
 
 
@@ -443,8 +423,9 @@ app.post('/login', passport.authenticate('local-login', {
 	failureFlash: true
 }));
 
-////  Advertiser Login
 
+
+////  Advertiser Login
 app.get('/login_ad', function(req, res, err){
 	var bottle = req.flash('login_ad_Message');
 	console.log(bottle[0]);
@@ -503,6 +484,8 @@ app.post('/login_ad', passport.authenticate('local-login-ad', {
 	failureFlash: true
 }));
 
+
+
 ////  Affiliate Signup
 app.get('/signup', function(req, res, err){
 	var bottle = req.flash('signupMessage');
@@ -523,7 +506,6 @@ app.get('/signup', function(req, res, err){
 	});
 	res.sendFile("views/Signup_Application.html", {root: __dirname});
 });
-
 
 passport.use(
         'local-signup',
@@ -676,8 +658,8 @@ app.post('/signup', passport.authenticate('local-signup', {
 }));
 
 
-//// Advertiser Signup
 
+//// Advertiser Signup
 app.get('/signup_ad', function(req, res, err){
 	var bottle = req.flash('signup_ad_Message');
 	console.log(bottle[0]);
@@ -801,14 +783,35 @@ app.post('/signup_ad', passport.authenticate('local-signup-ad', {
 		failureFlash : true // allow flash messages
 }));
 
+//----------------------------------------------------------------------------------------------//
+//check if logged in
+function loggedin(req, res, next){
+	if (req.user){
+		next();
+	}
+	else{
+		//res.redirect('/login');
+		next();
+	}
+}
+// offers
+app.get("/offers", loggedin, function(req, res, err){
+	console.log(req);
+	console.log("request:" + req.user);
+	var sql = "SELECT * FROM campaigns WHERE approved = 1;";
+	pool.getConnection(function(err, connection){
+		connection.query(sql, function(err, rows){
+			console.log("hello?" + rows[0]);
+		})
+	});
+	res.sendFile("views/affiliateCampaignsDescription.html", {root: __dirname});
+});
 
 
 
 
 
-
-
-
+//---------------------------------pixel tracking handling--------------------------------------//
 
 app.get('/pixel.gif', function(req, res, err){
 	var ua = req.headers['user-agent'],
@@ -834,15 +837,107 @@ app.get('/pixel.gif', function(req, res, err){
 
 	if (/Windows NT/.test(ua))
     $.Windows = /Windows NT ([0-9\._]+)[\);]/.exec(ua)[1];
-	console.log(req.session.cookie);
+
+	console.log(req.session);
+	console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+	console.log(req.startTime);
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+	// put this as one of the first middleware so it acts 
+	// before other middleware spends time processing the request
+	var countip = false;
+	if (accesses.check(req.connection.remoteAddress)){
+		countip = true;
+	}
+//////////////////////////////////////////////////////////////////////////////////////////////
+	// count the clicks in mysql
+	// make sure one ip address only counts once
+	offer_id = req.query.offer_id;
+	aff_id = req.query.aff_id;
+
+	//var sql2 = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE Table_Name = 'campaigns' AND COLUMN_NAME LIKE 'af%';"
+	if (countip){
+	var sql = "UPDATE campaigns SET Unique_Click = Unique_Counts + 1 WHERE Offer_ID = " + offer_id + ";";
+	pool.getConnection(function(err, connection){
+		connection.query(sql, function(err, rows){
+			console.log("sucess:", rows);
+			connection.release();
+		});
+	});
+	}
+	
 	res.sendFile("views/pixel.html", {root: __dirname});
 });
+
+// Data Structure For Unique IP Count.
+function AccessLogger(blockTime) {
+	    this.blockTime = blockTime;
+	    this.requests = {};
+	    // schedule cleanup on a regular interval (every 2 hours)
+	    this.interval = setInterval(this.age.bind(this), 2 * 60 * 60 * 1000);
+}
+
+AccessLogger.prototype = {
+	check: function(ip) {
+	     	var info, accessTimes, now, cnt;
+
+	        // add this access
+	        this.add(ip);
+
+	        // should always be an info here because we just added it
+	        info = this.requests[ip];
+	        accessTimes = info.accessTimes;
+
+	        // calc time limits
+	        now = Date.now();
+	        //limit = now - this.time;
+	        console.log("request: " + this.requests[ip].accessTimes);
+	        console.log("blockuntil: " + this.requests[ip].blockUntil);
+	        // short circuit if already blocking this ip
+	        if (info.blockUntil >= now) {
+	            return false;
+	        }
+
+	        info.blockUntil = now + this.blockTime;
+	        return true;
+
+	    },
+	    add: function(ip) {
+	        var info = this.requests[ip];
+	        if (!info) {
+	            info = {accessTimes: [], blockUntil: 0};
+	            this.requests[ip] = info;
+	        }
+	        // push this access time into the access array for this IP
+	        info.accessTimes.push(Date.now());
+	    },
+	    age: function() {
+	        // clean up any accesses that have not been here within this.time and are not currently blocked
+	        var ip, info, accessTimes, now = Date.now(), index;
+	        for (ip in this.requests) {
+
+	            if (this.requests.hasOwnProperty(ip)) {
+	                info = this.requests[ip];
+	                accessTimes = info.accessTimes;
+	                // if not currently blocking this one
+	                if (info.blockUntil < now) {
+	                            info.accessTimes = [];
+	                        //}
+	                    }
+	                }
+	            }
+	        }
+	    }
+
+//block for 6 hours 
+var accesses = new AccessLogger(6 * 60 * 60 * 1000);
+
 
 
 http.listen(3000, function(){
   console.log("Started on PORT 3000");
 })
-
 /* Table Created, this section of code may not be further used.
 // Can be optimized with CHAR
 var sql = "CREATE TABLE client_info( " +
