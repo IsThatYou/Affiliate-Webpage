@@ -1,33 +1,23 @@
 $(document).ready(function() {
-    //alert("load data from database");
+/*
+    $("#tableForCampaigns").empty();
+    //console.log("bibibibibi");
+    for (var i in data.results){
+        console.log(data.results.length);
+        var name = data.results[i].Name;
+        var start = data.results[i].Start_Time;
+        var end = data.results[i].Expire_Time;
+        var offer_id = data.results[i].Offer_id;
+        var category = data.results[i].Category;
+        start = start.substring(0, 10);
+        end = end.substring(0, 10);
+        $('#tableForCampaigns').append('<tr id="row' + offer_id + '"><td>' 
+            + offer_id + '</td><td>'
+            + name + '</td><td>' 
+            + category + '</td><td>'
+            + start + '</td><td>' 
+            + end + '</td><td>');
+*/
 
-    // Amount from the data
-    var amount = 0;
-
-    var image = 0;
-    var type = 'Campaign ';
-    var name = 'Test ';
-    var update = 'mm-dd-yy';
-    var startDate = 'mm-dd-yy';
-    var description = 'lorem ipsum';
-    var exp = 'mm-dd-yy';
-    var payout = 100;
-
-    for (var i = 0; i < 7; i++) {
-
-        var image = image + i;
-        var type = 'Campaign ' + i;
-        var name = 'Test ' + i;
-        var update = update;
-        var startDate = startDate;
-        var description = description;
-        var exp = exp;
-        var payout = payout + 100 * i;
-
-        $('#tableForCampaigns').append('<tr id="row' + i + '"><td>' + image + '</td><td>' + type + '</td><td>' + name + '</td><td>' + update + '</td><td>' + startDate + '</td><td>' + description + '</td><td>' + exp + '</td><td>' + payout + '</td><td>');
-        amount++;
-    }
-
-    $('#campaignAmount').append(' (' + amount + ')');
 
 });

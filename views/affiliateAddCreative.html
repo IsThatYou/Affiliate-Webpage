@@ -1,0 +1,301 @@
+<html>
+  <head>
+    <title>Add Creative</title>
+    <link href="css/styles.css" rel="stylesheet" type="text/css">
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/datepicker.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js
+    "></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <!-- Wrap all page content here -->
+    <div id="wrap">
+      
+      <!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">MEDIA</a>
+          </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="affiliateMainPage.html">Home</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Offers<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="affiliateOffers.html">All Offers</a></li>
+                  <li><a href="#">Offers by Category</a></li>
+                  <li><a href="#">Search All Offers</a></li>
+                  <li><a href="#">Exclusives</a></li>
+                  <li><a href="#">Search Offers</a></li>
+                  <li><a href="#">Email and Zip Submits</a></li>
+                  <li><a href="#">Seasonal</a></li>
+                </ul>
+              </li>
+              <li><a href="affiliateCampaignDescription.html">Campaigns</a></li>
+              <li><a href="affiliateTools.html">Tools</a></li>
+              <li><a href="affiliateAbout.html">About</a></li>
+              <li><a href="affiliateContact.html">Contact</a></li>
+            </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
+        
+        <!-- Begin page content -->
+        <div class="container">
+          <div class="page-header">
+            <h2>Add Creative</h2>
+            <div class="collapse" id="campaignDescription">
+            </div>
+          </div>
+          <div class="content">
+            <div class="firstArea panel panel-default">
+              <div class="row">
+                <div class="col-xs-4 padding"><h4>1. Choose Creative Type</h4></div>
+              </div>
+              <div class="row">
+                <div class="col-xs-4">
+                </div>
+                <div class="col-xs-8">
+                  <div class="radio">
+                    <label><input type="radio" name="optradio">Image</label>
+                  </div>
+                  <div class="radio">
+                    <label><input type="radio" name="optradio">Text</label>
+                  </div>
+                  <div class="radio">
+                    <label><input type="radio" name="optradio">HTML</label>
+                  </div>
+                  <div class="radio">
+                    <label><input type="radio" name="optradio">Zipped</label>
+                  </div>
+                  <div class="radio">
+                    <label><input type="radio" name="optradio">Email</label>
+                  </div>
+                  <div class="radio">
+                    <label><input type="radio" name="optradio">Contextual</label>
+                  </div>
+                  <div class="radio">
+                    <label><input type="radio" name="optradio">Custom Landing</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="firstArea panel panel-default">
+              <div class="row">
+                <div class="col-xs-4 padding"><h4>2. General Options</h4></div>
+              </div>
+              <div class="row">
+                <div class="col-xs-4 padding">Linking URL:
+                </div>
+                <div class="col-xs-8 padding">
+                  <input type="text" class="form-control" id="linkingURL" placeholder="Linking URL">
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-4">
+                  Use Direct Link:
+                </div>
+                <div class="col-xs-8">
+                  <div class="radio" style="display:inline">
+                    <label><input type="radio" name="optradio">Yes</label>
+                  </div>
+                  <div class="radio" style="display:inline">
+                    <label><input type="radio" name="optradio">No</label>
+                  </div>
+                  
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-4 padding">Description:
+                </div>
+                <div class="col-xs-8 padding">
+                  <textarea rows="2" cols="50" class="form form-control" id="creativeDescription">
+                  </textarea>
+                </div>
+              </div>
+            </div>
+            <div class="firstArea panel panel-default">
+              <div class="row">
+                <div class="col-xs-4 padding"><h4>3. Image Options</h4></div>
+              </div>
+              <div class="row">
+                <div class="col-xs-4 padding">Choose Image:
+                </div>
+                <div class="col-xs-8 padding">
+                <form action="/upload-target" class="dropzone btn btn-default btn-md btn-block" href="#"role="button" id="uploadBanners"></form>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4">
+                Or Specify Image URL:
+              </div>
+              <div class="col-xs-8">
+                <input type="text" class="form-control" id="imageURL" placeholder="Image URL">
+                
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">ALT Tag:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" class="form-control" id="altTag" placeholder="ALT Tag">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Banner Size:
+              </div>
+              <div class="col-xs-8 padding">
+                <select class="form-control" id="bannerSize">
+                  <option selected="selected" disabled="disabled">Select a Size</option>
+                  <option>468x60</option>
+                  <option>160x600</option>
+                  <option>120x600</option>
+                  <option>300x250</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="firstArea panel panel-default">
+            <div class="row">
+              <div class="col-xs-4 padding"><h4>4. Expiration Options</h4></div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Expiration Date:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" placeholder="" id="start" class="datepicker form-control" style="width:50%">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4">
+                Expire Creative After:
+              </div>
+              <div class="col-xs-8">
+                <input type="text" class="form-control" id="amountOfClicksBeforeExp" placeholder="Amount of Clicks" style="display:inline;width:50%"> clicks
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Expire Creative After:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" class="form-control" id="amountOfImpressionsBeforeExp" placeholder="Amount of Impressions" style="display:inline;width:50%"> impressions
+              </div>
+            </div>
+          </div>
+          <div class="firstArea panel panel-default">
+            <div class="row">
+              <div class="col-xs-4 padding"><h4>5. Adjusted Payout</h4></div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Per Click Partner Payout:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" class="form-control" id="perClickPayout" placeholder="(e.g. 0.05)">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Per Lead Partner Payout:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" class="form-control" id="perLeadPayout" placeholder="(e.g. 0.10)">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Per Impression Partner Payout:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" class="form-control" id="perImpressionPayout" placeholder="(e.g. 0.05)">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">% Per sale Partner Payout:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" class="form-control" id="perSalePayout" placeholder="Per Sale (e.g. 100)">
+                <input type="text" class="form-control" id="perSubSalePayout" placeholder="Per Sub Sale (e.g. 0.50)">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Flat Per Sale Payout:
+              </div>
+              <div class="col-xs-8 padding">
+                <input type="text" class="form-control" id="perFlatSalePayout" placeholder="Per Sale (e.g. 0.5)">
+                <input type="text" class="form-control" id="perFlatSubSalePayout" placeholder="Per Sub Sale (e.g. 0.50)">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4 padding">Efective Date:
+              </div>
+              <div class="col-xs-8 padding">
+                <input  type="text" placeholder="" id="start" class="datepicker form-control">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-4">
+                Partner CD Number:
+              </div>
+              <div class="col-xs-8">
+                <input type="text" class="form-control" id="newCampaignName" placeholder="(i.e. CD34)">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="paddingTop">
+          <div class="secondArea panel panel-default">
+            <div class="row">
+              <div class="col-xs-4 padding"></div>
+              <div class="col-xs-8 centered padding">
+                <a class="btn btn-info btn-md btn-block" href="#" style="width:50%;" role="button" id="submitCampaign">Add New Creative</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="footer">
+    <div class="">
+      <p class="text-muted credit">Footer <a href="#">Footer</a></p>
+    </div>
+  </div>
+  <script>$(function () {
+  $('#accordion').on('shown.bs.collapse', function (e) {
+  var offset = $('.panel.panel-default > .panel-collapse.in').offset();
+  if(offset) {
+  $('html,body').animate({
+  scrollTop: $('.panel-title a').offset().top -50
+  }, 500);
+  }
+  });
+  });</script>
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/links.js"></script>
+  <script src="js/addCreative.js"></script>
+  <script src="js/dropzone.js"></script>
+  <script src="js/bootstrap-datepicker.js"></script>
+  <script>
+  $('.navbar .dropdown').hover(function() {
+  $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+  }, function() {
+  $(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
+  });</script>
+  <script type="text/javascript">
+  // When the document is ready
+  $(document).ready(function () {
+  $('.datepicker').datepicker({
+  format: "mm/dd/yyyy"
+  });
+  });
+  </script>
+</body>
+</html>

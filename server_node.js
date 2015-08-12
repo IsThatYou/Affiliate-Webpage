@@ -31,14 +31,26 @@ var path = require("path");
 var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
 
+// uploading
+var multer  = require('multer');
+var path = require('path');     //used for file path
+var fs = require('fs-extra'); 
+
+
 app.use(morgan('dev'));
 //app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: false}));
 app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/views'));
 app.get('/',function(req,res){
-  res.sendFile("views/Signup_Application.html", {root:__dirname});
+  res.render('Signup_Application.ejs', { message: '' });
 });
+
+var upload = multer({ dest: './uploads/' });
+
+
+
+
 
 
 //*Emailjs
@@ -46,11 +58,17 @@ var email = require('emailjs');
 io.on("connection", function(socket){
 	console.log("socket connected...");
 	//// Send client's info when requested.
-	socket.on("application info", function(){
-		
-		sql = "SELECT First_Name, Last_Name, SSN_TAX_ID, Site_URL1, Site_Category1," +
-		"Address1, City, State, State2, Country, Zip, Phone, Assigned_ID FROM client_info " +
-		"WHERE approved = 0;";
+	socket.on("application info", function(data){
+		var sql = '';
+		if (data.message == '1'){
+			sql = "SELECT First_Name, Last_Name, Company, SSN_TAX_ID, Site_URL1, Site_Category1," +
+			"Address1, City, State, State2, Country, Zip, Phone, Assigned_ID FROM client_info " +
+			"WHERE approved = 0;";
+		} else {
+			sql = "SELECT First_Name, Last_Name, Email, Company, SSN_TAX_ID, Site_URL1, Site_Category1," +
+			"Address1, City, State, State2, Country, Zip, Phone, Assigned_ID FROM client_info " +
+			"WHERE approved = 1;";
+		}
 		pool.getConnection(function(err, connection) {
 	  	// Use the connection
 	  		connection.query(sql, function selectCb(err, results, fields) {
@@ -61,13 +79,27 @@ io.on("connection", function(socket){
 	    	if (results.length > 0){
 
 		    	console.log("page updated");
-				socket.emit("application_info", {results:results});
+		    	if (data.message == '1'){
+					socket.emit("application_info", {results:results});
+				} else {
+					socket.emit("application_info2", {results:results});
+				}
 		    	
 	    	}
 	    	connection.release();
 	    // Don't use the connection here, it has been returned to the pool.
 	 	 });
 	  	});
+	});
+	socket.on("remove affiliate", function(data){
+		var id = data.ID;
+		sql = "DELETE FROM client_info WHERE Assigned_ID=" + id + ";";
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function(err, rows){
+				console.log("Affiliate deleted");
+			});
+			connection.release();
+		});
 	});
 	//// Send advertiser's info when requested.
 	socket.on("application ad info", function(){
@@ -300,15 +332,9 @@ io.on("connection", function(socket){
 
 
 
-///---------------------- *Passport -- a signup, login function ---------------------------///
+///---------------------- *Passport -- two signup, login functions ---------------------------///
 
-app.get('/approve',function(req,res){
-  res.sendFile("views/affiliateApproval.html", {root:__dirname});
-});
 
-app.get('/approve_ad',function(req,res){
-  res.sendFile("views/advertiserApproval.html", {root:__dirname});
-});
 
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -328,25 +354,30 @@ passport.serializeUser(function(user, done) {
 	// if the user is an advertiser, add 'ad' before the ID to differentiate it from affiliates
 
 	console.log('identity: ' + user.Identity);
-    done(null, 86);
+	var id = {num:user.Assigned_ID, Identity:user.Identity};
+    done(null, id);
     });
 
 //TEST
 passport.deserializeUser(function(id, done) {
 	console.log('test: ' + id.Identity);
 	console.log(!id.Identity);
-	if (id.Identity != undefined){
+	if (id.Identity == 'ad'){
 		pool.getConnection(function(err, connection){
-	    	connection.query("SELECT * FROM advertiser_info WHERE Assigned_ID = ? ",[id], function(err, rows){
+	    	connection.query("SELECT * FROM advertiser_info WHERE Assigned_ID = ? ",[id.num], function(err, rows){
 	        done(err, rows[0]);
 	        connection.release();
 	    	});
     	});
-	} else{
-	pool.getConnection(function(err, connection){
-    	connection.query("SELECT * FROM client_info WHERE Assigned_ID = ? ",[id], function(err, rows){
-        done(err, rows[0]);
-        connection.release();
+	} 
+	if (id.Identity == 'admin'){
+		done(null, id);
+	}
+	else{
+		pool.getConnection(function(err, connection){
+    		connection.query("SELECT * FROM client_info WHERE Assigned_ID = ? ",[id.num], function(err, rows){
+	        done(err, rows[0]);
+	        connection.release();
     		});
     	});
 	}
@@ -359,30 +390,9 @@ app.use(flash());
 
 
 //// Affiliate Login
+app.set('view engine', 'ejs');
 app.get('/login', function(req, res, err){
-	var bottle = req.flash('loginMessage');
-	console.log(bottle[0]);
-	if (bottle[0] != undefined){
-		
-		io.on("connection", function(socket){
-			socket.emit("aflogin", {message: bottle});
-			socket.on("disconnect1", function(){
-				socket.disconnect();
-			});
-		});
-
-	}
-	
-	io.on("connection", function(socket){
-		socket.emit("aflogin_delete");
-		socket.on("disconnect1_delete", function(){
-			socket.disconnect();
-		}); ///////////do this for every login/signup
-
-		
-	});
-	io.sockets.emit("aflogin_delete", {message: bottle});
-	res.sendFile("views/affiliateLogin.html", {root: __dirname});
+	res.render('affiliateLogin.ejs', { message: req.flash('loginMessage') });
 });
 
 passport.use(
@@ -418,7 +428,7 @@ passport.use(
 );
 
 app.post('/login', passport.authenticate('local-login', {
-	successRedirect: '/profile',
+	successRedirect: '/offers',
 	failureRedirect: '/login',
 	failureFlash: true
 }));
@@ -427,23 +437,7 @@ app.post('/login', passport.authenticate('local-login', {
 
 ////  Advertiser Login
 app.get('/login_ad', function(req, res, err){
-	var bottle = req.flash('login_ad_Message');
-	console.log(bottle[0]);
-	if (bottle[0] != undefined){
-		io.on("connection", function(socket){
-			socket.emit("adlogin", {message: bottle});
-			socket.on("disconnect2", function(){
-				socket.disconnect();
-			});
-		});
-	}
-	io.on("connection", function(socket){
-		socket.emit("adlogin_delete");
-		socket.on("disconnect2_delete", function(){
-				socket.disconnect();
-			});
-	});
-	res.sendFile("views/advertiserLogin.html", {root: __dirname});
+	res.render('advertiserLogin.ejs', { message: req.flash('login_ad_Message') });
 });
 
 passport.use(
@@ -488,23 +482,7 @@ app.post('/login_ad', passport.authenticate('local-login-ad', {
 
 ////  Affiliate Signup
 app.get('/signup', function(req, res, err){
-	var bottle = req.flash('signupMessage');
-	console.log(bottle[0]);
-	if (bottle[0] != undefined){
-		io.on("connection", function(socket){
-			socket.emit("afsignup", {message: bottle});
-			socket.on("disconnect-signup-af", function(){
-				socket.disconnect();
-			});
-		});
-	}
-	io.on("connection", function(socket){
-		socket.emit("afsignup_delete");
-		socket.on("disconnect-signup-af_delete", function(){
-				socket.disconnect();
-			});
-	});
-	res.sendFile("views/Signup_Application.html", {root: __dirname});
+	res.render('Signup_Application.ejs', { message: req.flash('signupMessage') });
 });
 
 passport.use(
@@ -661,23 +639,7 @@ app.post('/signup', passport.authenticate('local-signup', {
 
 //// Advertiser Signup
 app.get('/signup_ad', function(req, res, err){
-	var bottle = req.flash('signup_ad_Message');
-	console.log(bottle[0]);
-	if (bottle[0] != undefined){
-		io.on("connection", function(socket){
-			socket.emit("adsignup", {message: bottle});
-			socket.on("disconnect-signup-ad", function(){
-				socket.disconnect();
-			});
-		});
-	}
-	io.on("connection", function(socket){
-		socket.emit("adsignup_delete");
-		socket.on("disconnect-signup-ad_delete", function(){
-				socket.disconnect();
-			});
-	});
-	res.sendFile("views/advertiserSignup.html", {root: __dirname});
+	res.render('advertiserSignup.ejs', { message: req.flash('signup_ad_Message') });
 });
 
 passport.use(
@@ -784,33 +746,365 @@ app.post('/signup_ad', passport.authenticate('local-signup-ad', {
 }));
 
 //----------------------------------------------------------------------------------------------//
+//-------------------------------------Affiliates-----------------------------------------------//
 //check if logged in
+
 function loggedin(req, res, next){
 	if (req.user){
 		next();
 	}
 	else{
-		//res.redirect('/login');
-		next();
+		res.redirect('/login');
 	}
 }
 // offers
+
 app.get("/offers", loggedin, function(req, res, err){
-	console.log(req);
-	console.log("request:" + req.user);
-	var sql = "SELECT * FROM campaigns WHERE approved = 1;";
-	pool.getConnection(function(err, connection){
-		connection.query(sql, function(err, rows){
-			console.log("hello?" + rows[0]);
-		})
-	});
-	res.sendFile("views/affiliateCampaignsDescription.html", {root: __dirname});
+
+	if (req.session.passport.Identity != 'ad'){
+
+		var sql = "SELECT * FROM campaigns WHERE approved = 1;";
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function(err, rows){
+				res.render('affiliateCampaignsDescription.ejs', { message: rows });
+				connection.release();
+			});
+		});
+
+		
+
+	} else{
+		res.render('affiliateLogin.ejs', { message: null });
+	}
+	
 });
 
 
 
 
+//----------------------------------------------------------------------------------------------//
+//--------------------------------------------Admin---------------------------------------------//
+app.get("/admin", function(req, res, err){
+	res.render('adminLogin.ejs', { message: req.flash('login_admin_Message') });
+});
 
+function adminloggedin(req, res, next){
+	if (req.user){
+		if (req.user.Identity == 'admin'){
+			next();
+		}
+		else{
+			res.redirect('/admin');
+		}
+	} else{
+			res.redirect('/admin');
+	}
+}
+
+app.get('/admin/approve', adminloggedin, function(req,res){
+  res.sendFile("views/affiliateApproval.html", {root:__dirname});
+});
+
+app.get('/admin/approve_ad', adminloggedin, function(req,res){
+  res.sendFile("views/advertiserApproval.html", {root:__dirname});
+});
+
+app.get("/admin/affiliates", adminloggedin, function(req, res, err){
+	res.render('affiliateUserManagementList.ejs', { message: null });
+});
+
+app.get('/admin/users', adminloggedin, function(req,res){
+	var aff_id = req.query.aff_id;
+	if (aff_id){
+
+
+		console.log("aff_id: " + aff_id);
+		sql = "SELECT * FROM client_info WHERE Assigned_ID=" + aff_id + ";";
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function selectCb(err, results, fields){
+				console.log(results[0]);
+				res.render('affiliateUserInformation.ejs', { message: results[0]});
+			});
+			connection.release();
+		})
+	} else {
+		res.render('affiliateUserInformation.ejs', { message: null });
+	}
+	
+});
+
+app.post('/admin/users', adminloggedin, function(req, res){
+	var proparray = [];
+	for (var prop in req.body){
+		proparray.push(prop);
+	}
+	for (var i = 0; i < proparray.length; i++){
+		if (req.body[proparray[i]] == '' || req.body[proparray[i]] == 'http://' || req.body[proparray[i] == undefined]){
+			req.body[proparray[i]] = null;
+		}
+	}
+	console.log(req.body);
+	sql = "UPDATE client_info SET" + 
+	" First_Name='" + req.body[proparray[0]] + "', " +
+	"Last_Name='" + req.body[proparray[1]] + "', " +
+	"Company='" + req.body[proparray[2]] + "', " +
+	"Checks_To='" + req.body[proparray[3]] + "', " +
+	"SSN_TAX_ID='" + req.body[proparray[4]] + "', " +
+	"Payment_Threshhold='" + req.body[proparray[5]] + "', " +
+	"Email='" + req.body[proparray[6]] + "', " +
+	"Phone='" + req.body[proparray[7]] + "', " +
+	"Address1='" + req.body[proparray[8]] + "', " +
+	"Address2='" + req.body[proparray[9]] + "', " +
+	"City='" + req.body[proparray[10]] + "', " +
+	"State='" + req.body[proparray[11]] + "', " +
+	"State2='" + req.body[proparray[12]] + "', " +
+	"Country='" + req.body[proparray[13]] + "', " +
+	"Zip='" + req.body[proparray[14]] + "', " +
+	"Site_URL1='" + req.body[proparray[15]] + "', " +
+	"Alexa_Ranking1='" + req.body[proparray[16]] + "', " +
+	"Site_URL2='" + req.body[proparray[17]] + "', " +
+	"Alexa_Ranking2='" + req.body[proparray[18]] + "', " +
+	"Site_URL3='" + req.body[proparray[19]] + "', " +
+	"Alexa_Ranking3='" + req.body[proparray[20]] + "', " +
+	"Site_URL4='" + req.body[proparray[21]] + "', " +
+	"Alexa_Ranking4='" + req.body[proparray[22]] + "', " +
+	"CPA_Affiliate_Marketing='" + req.body[proparray[23]] + "', " +
+	"Site_Category1='" + req.body[proparray[24]] + "', " +
+	"Site_Category2='" + req.body[proparray[25]] + "', " +
+	"Site_Category3='" + req.body[proparray[26]] + "', " +
+	"Unique_Visitors_PM='" +req.body[proparray[27]] + "', " +
+	"News_Letter='" + req.body[proparray[28]] + "', " +
+	"Solo_Email='" + req.body[proparray[29]] + "', " +
+	"Sin_Dou_Optin='" + req.body[proparray[30]] + "', " +
+	"Mailing_Freq='" + req.body[proparray[31]] + "', " +
+	"Time_Record='" + req.body[proparray[32]] +
+	"' WHERE Assigned_ID = " + req.body[proparray[i-1]] + ";"; 
+	pool.getConnection(function(err, connection){
+		connection.query(sql, function(err, fields){
+			if (err){
+				console.log("Genuis strikes again: " + err.message);
+			}
+		});
+		connection.release();
+	});
+});
+
+app.post('/admin', passport.authenticate('local-login-admin', {
+		successRedirect : '/admin/Create_Campaign', // redirect to the secure profile section
+		failureRedirect : '/admin', // redirect back to the signup page if there is an error
+		failureFlash : true // allow flash messages
+}));
+passport.use(
+    'local-login-admin',
+    new LocalStrategy({
+        // by default, local strategy uses username and password, we will override with email
+        usernameField : 'email',
+        passwordField : 'password',
+        passReqToCallback : true // allows us to pass back the entire request to the callback
+    },
+    function(req, username, password, done) { // callback with email and password from our form
+    	var true_pass = 'cminyc';
+    	var true_user = 'admin';
+    	console.log(username, password);
+        if (!username.length || true_pass != password || username != true_user){
+            return done(null, false, req.flash('login_admin_Message', 'Oops! Wrong Password or Email.')); // create the loginMessage and save it to session as flashdata
+        }
+
+        // if the user is found but the password is wrong
+        
+        // all is well, return successful user
+        var the = {Assigned_ID: true_user, Identity:"admin"};
+        return done(null, the);
+	       
+
+    })
+);
+
+app.get("/admin/Create_Campaign", adminloggedin, function(req, res, err){
+	res.render('affiliateCreateCampaign.ejs', { message: null });
+});
+
+
+app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (req, res, next) {
+	// body
+	var proparray = [];
+	for (var prop in req.body){
+		proparray.push(prop);
+	}
+	console.log(proparray.length + 2);
+	for (var i = 0; i < proparray.length; i++){
+		if (req.body[proparray[i]] == '' || req.body[proparray[i]] == 'http://' || req.body[proparray[i] == undefined]){
+			req.body[proparray[i]] = null;
+		}	
+	}
+	// special case for no.46 entry
+	var country = req.body[proparray[46]];
+	if (req.body[proparray[46]] != null && req.body[proparray[46]][0] == ','){
+		country = req.body[proparray[46]].substring(1, req.body[proparray[46]][0].length);
+		country = country[1];
+	}
+	console.log( req.body[proparray[47]]);
+
+	var info = "INSERT INTO campaigns" + 
+						"(Cost_Per_Lead," +
+						"Cost_Per_Click," +
+						"Cost_Per_TI," +
+						"Cost_Per_Sale," + 
+						"Monthly_Recurring_Payment," + 
+						"Product_Specific," +
+						"Pop_up," + 
+						"Pop_UnderUp_Value," + 
+						"SCP," + 
+						"Name," + 
+						"Advertiser_ID," + 
+						"Url," + 
+						"Long_D," +
+						"Short_D," +
+						"Start_Date," + 
+						"End_Date," + 
+						"Offered_Clicks," + 
+						"Offered_Leads," + 
+						"Offered_Sales," + 
+						"Offered_Impressions," + 
+						"Offered_CoRegi," + 
+						"Affiliate_Per_Click," + 
+						"Affiliate_Lead_PC," + 
+						"Affiliate_Impression_PC," + 
+						"Affiliate_Per_Sale," + 
+						"Affiliate_Per_Sub_Sale," + 
+						"Affiliate_Flat_Per_Sale," + 
+						"Affiliate_Flat_Per_Sub_Sale," + 
+						"run," + 
+						"sel1," +
+						"sel2," + 
+						"sel3," +
+						"Ndate," +
+						"NClicks," +
+						"NLeads," +
+						"NSales," +
+						"NImpression," + 
+						"Notif_Date," + 
+						"Clicks_Level," + 
+						"Leads_Level," + 
+						"Sales_Level," + 
+						"Impression_Level," + 
+						"Threshold_Email," + 
+						"Type_Tracking," +
+						"Tracking_Pixel," +
+						"Country," +
+						"Specific_Country," +
+						"Note)" +
+						" VALUES " +
+						"(" + 
+						'"' + req.body[proparray[0]] + '",' +
+						'"' + req.body[proparray[1]] + '",' +
+						'"' + req.body[proparray[2]] + '",' +
+						'"' + req.body[proparray[3]] + '",' +
+						'"' + req.body[proparray[4]] + '",' +
+						'"' + req.body[proparray[5]] + '",' + 
+						'"' + req.body[proparray[6]] + '",' +
+						'"' + req.body[proparray[7]] + '",' +
+						'"' + req.body[proparray[8]] + '",' + 
+						'"' + req.body[proparray[9]] + '",' + 
+						'"' + req.body[proparray[10]] + '",' +
+						'"' + req.body[proparray[11]] + '",' + 
+						'"' + req.body[proparray[12]] + '",' + 
+						'"' + req.body[proparray[13]] + '",' +
+						'"' + req.body[proparray[14]] + '",' + 
+						'"' + req.body[proparray[15]] + '",' +
+						'"' + req.body[proparray[16]] + '",' + 
+						'"' + req.body[proparray[17]] + '",' + 
+						'"' + req.body[proparray[18]] + '",' + 
+						'"' + req.body[proparray[19]] + '",' + 
+						'"' + req.body[proparray[20]] + '",' +
+						'"' + req.body[proparray[21]] + '",' +
+						'"' + req.body[proparray[22]] + '",' +
+						'"' + req.body[proparray[23]] + '",' +
+						'"' + req.body[proparray[24]] + '",' +
+						'"' + req.body[proparray[25]] + '",' +
+						'"' + req.body[proparray[26]] + '",' +
+						'"' + req.body[proparray[27]] + '",' + 
+						'"' + req.body[proparray[28]] + '",' + 
+						'"' + req.body[proparray[29]] + '",' + 
+						'"' + req.body[proparray[30]] + '",' +
+						'"' + req.body[proparray[31]] + '",' +
+						'"' + req.body[proparray[32]] + '",' + 
+						'"' + req.body[proparray[33]] + '",' + 
+						'"' + req.body[proparray[34]] + '",' +
+						'"' + req.body[proparray[35]] + '",' +
+						'"' + req.body[proparray[36]] + '",' + 
+						'"' + req.body[proparray[37]] + '",' +
+						'"' + req.body[proparray[38]] + '",' +
+						'"' + req.body[proparray[39]] + '",' + 
+						'"' + req.body[proparray[40]] + '",' +
+						'"' + req.body[proparray[41]] + '",' +
+						'"' + req.body[proparray[42]] + '",' +
+						'"' + req.body[proparray[43]] + '",' +
+						'"' + req.body[proparray[44]] + '",' +
+						'"' + req.body[proparray[45]] + '",' +
+						'"' + country + '",' +
+						'"' + req.body[proparray[47]] + 
+						'");';
+	console.log(info);
+	var camp_id = 2;
+	var advertiser_id = 2;
+	var path = '';
+	pool.getConnection(function(err, connection){
+		console.log('1');
+		connection.query(info, function(error, fields) {
+			
+		    console.log('did it:'  + fields.insertId);
+
+		    // get the advertiser_id of the row just inserted
+			sql1 = "SELECT Advertiser_ID FROM campaigns WHERE Assigned_ID = ?"
+		    connection.query(sql1, fields.insertId, function(err, rows){
+		    	
+		    	console.log(rows[0]);
+		    	camp_id = fields.insertId;
+		    	advertiser_id = rows[0].Advertiser_ID;
+		    	// create a folder with camp_id and advertiser_id to store banners.
+		    	path = "./uploads/banner-" + camp_id + "-" + advertiser_id;
+
+				var mkdirSync = function (path) {
+					  try {
+					    fs.mkdirSync(path);
+					  } catch(e) {
+					    if ( e.code != 'EEXIST' ) throw e;
+					  }
+					}
+	
+				mkdirSync(path);
+				// store the images 
+				for (var i in req.files){
+
+					var tmp_path = req.files[i].path;
+					var target_path = path + "/" + req.files[i].originalname;
+					
+					var src = fs.createReadStream(tmp_path);
+					var dest = fs.createWriteStream(target_path);
+					src.pipe(dest);
+
+					fs.unlink(tmp_path, function (err) {
+					  if (err) throw err;
+					  console.log('successfully deleted ' + tmp_path);
+					});
+					src.on('error', function(err) { res.render('affiliateCreateCampaign.ejs', { message: null }); });
+					}
+		    	
+		    	
+		    });
+						    
+		    connection.release();
+		    
+		    // Don't use the connection here, it has been returned to the pool.
+	  	});
+	});
+
+});
+
+
+
+//----------------------------------------------------------------------------------------------//
 //---------------------------------pixel tracking handling--------------------------------------//
 
 app.get('/pixel.gif', function(req, res, err){
@@ -847,6 +1141,7 @@ app.get('/pixel.gif', function(req, res, err){
 	// put this as one of the first middleware so it acts 
 	// before other middleware spends time processing the request
 	var countip = false;
+	console.log(accesses.check(req.connection.remoteAddress));
 	if (accesses.check(req.connection.remoteAddress)){
 		countip = true;
 	}
@@ -875,7 +1170,7 @@ function AccessLogger(blockTime) {
 	    this.blockTime = blockTime;
 	    this.requests = {};
 	    // schedule cleanup on a regular interval (every 2 hours)
-	    this.interval = setInterval(this.age.bind(this), 2 * 60 * 60 * 1000);
+	    this.interval = setInterval(this.age.bind(this), 1 * 60 * 60 * 1000);
 }
 
 AccessLogger.prototype = {
