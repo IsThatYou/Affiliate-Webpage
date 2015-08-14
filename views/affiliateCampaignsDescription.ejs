@@ -50,6 +50,9 @@
         
         <!-- Begin page content -->
         <div class="container">
+          <% if (mess.length > 0) { %>
+              <div class="alert alert-danger"><%= mess %></div>
+          <% } %>
           <div class="page-header">
             <h2 id="campaignAmount">Campaigns</h2>
             <p>Click on any Campaign Name to obtain sales tools/linking methods for that Campaign.</p>
@@ -60,6 +63,7 @@
               <table class="table table-striped">
                 <thead>
                   <tr>
+                    <th>Select</th>
                     <th>Campaign ID</th>
                     <th>Name</th>
                     <th>Category</th>
@@ -69,9 +73,10 @@
                     <th>Payment Per Click</th>
                   </tr>
                 </thead>
+                <form name=frm1 METHOD="Post" ACTION="Apply_Offers">
                 <tbody id="tableForCampaigns">
                   <% for (i in message){ %>
-                      <tr id="row' + offer_id + '"><td>
+                      <tr id=<%=message[i].Assigned_ID%>><td><input type="checkbox" name=<%=message[i].Assigned_ID%> value=<%=message[i].Assigned_ID%>></td><td>
                       <%=message[i].Assigned_ID%> </td><td>
                       <%=message[i].Name%> </td><td>
                       <%=message[i].sel1%> </td><td>
@@ -79,13 +84,16 @@
                       <%=message[i].End_Date.toString().substring(3,15)%>  </td><td>
                       <%=message[i].Short_D%>  </td><td>
                       <%=message[i].Cost_Per_Click%>  </td>
-
                   <% } %>
                   
                 
                 </tbody>
+                
               </table>
+
             </div>
+            <input class="btn btn-info btn-md btn-block" type="submit" style="width:30%;" role="button" id="submitCampaign" value='Select Offers'>
+          </form>
           </div>
         </div>
       </div>

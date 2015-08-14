@@ -45,7 +45,7 @@ app.use(express.static(__dirname + '/views'));
 app.get('/',function(req,res){
   res.render('Signup_Application.ejs', { message: '' });
 });
-
+app.use(cookieParser('secret'));
 var upload = multer({ dest: './uploads/' });
 
 
@@ -627,7 +627,7 @@ passport.use(
 	                }
 	            });
 			});
-		}));
+		})); 
    
 app.post('/signup', passport.authenticate('local-signup', {
 		successRedirect : '/login', // redirect to the secure profile section
@@ -760,22 +760,68 @@ function loggedin(req, res, next){
 // offers
 
 app.get("/offers", loggedin, function(req, res, err){
-
 	if (req.session.passport.Identity != 'ad'){
 
 		var sql = "SELECT * FROM campaigns WHERE approved = 1;";
 		pool.getConnection(function(err, connection){
 			connection.query(sql, function(err, rows){
-				res.render('affiliateCampaignsDescription.ejs', { message: rows });
+				res.render('affiliateCampaignsDescription.ejs', { message: rows , mess: req.flash('aff_off_Message')});
 				connection.release();
 			});
 		});
-
-		
-
 	} else{
 		res.render('affiliateLogin.ejs', { message: null });
 	}
+});
+
+app.post('/Apply_Offers', function(req, res, err){
+	var proparray = [];
+	for (var prop in req.body){
+		proparray.push(prop);
+	}
+	
+	var sql = "SELECT Offers_Num, Offers_Pending, Offers_Limit FROM client_info WHERE Assigned_ID = "+ req.user.Assigned_ID +";";
+	console.log(sql);
+	pool.getConnection(function(err, connection){
+		if (err) console.log(err.message);
+		connection.query(sql, function(err, rows, fields){
+			if (err) console.log(err.message);
+			console.log(rows[0]);
+			// offers_num : current offers that are running, offers_pending : offers that are pending
+			// offers_limit : limit of the number of the offer
+			if (rows[0].Offers_Num + proparray.length + rows[0].Offers_Pending <= rows[0].Offers_Limit){
+				console.log("shadowblade");
+				var offers = "";
+				for (var i = 0; i < proparray.length; i++){
+					offers = offers + proparray[i] + ',';
+				}
+				var total_pending = proparray.length + rows[0].Offers_Pending;
+				sql1 = "UPDATE client_info SET Offers=(" +
+					"CASE WHEN Offers='null' " + 
+					"THEN '" + offers + "' " + 
+        			" ELSE concat(Offers, '"+ offers + "')" + 
+    				" END" + 
+					"), Offers_Pending=" + total_pending + " WHERE Assigned_ID=" + req.user.Assigned_ID + ";";
+				console.log(sql1);
+				connection.query(sql1, function(err, rows){
+					if (err) console.log(err.message);
+				});
+				var requestLeft = rows[0].Offers_Limit - rows[0].Offers_Num - proparray.length - rows[0].Offers_Pending;
+				console.log("request left: " + requestLeft);
+				req.flash('aff_off_Message', 'Requests successfully sent, you can have ' + requestLeft + ' out of ' + rows[0].Offers_Limit + ' more requests.');
+				res.redirect('/offers');
+			} else {
+				var requestLeft = rows[0].Offers_Limit - rows[0].Offers_Num - rows[0].Offers_Pending;
+				req.flash('aff_off_Message', 'Requests denied. You can only request for ' + requestLeft + ' more offer(s).  You have ' + rows[0].Offers_Num + ' offers running, ' + rows[0].Offers_Pending + ' offers pending.');
+				res.redirect('/offers');
+			}
+			
+			connection.release();
+		});
+	});
+	
+
+	//res.redirct('/offers');
 	
 });
 
@@ -857,28 +903,28 @@ app.post('/admin/users', adminloggedin, function(req, res){
 	"Address2='" + req.body[proparray[9]] + "', " +
 	"City='" + req.body[proparray[10]] + "', " +
 	"State='" + req.body[proparray[11]] + "', " +
-	"State2='" + req.body[proparray[12]] + "', " +
-	"Country='" + req.body[proparray[13]] + "', " +
-	"Zip='" + req.body[proparray[14]] + "', " +
-	"Site_URL1='" + req.body[proparray[15]] + "', " +
-	"Alexa_Ranking1='" + req.body[proparray[16]] + "', " +
-	"Site_URL2='" + req.body[proparray[17]] + "', " +
-	"Alexa_Ranking2='" + req.body[proparray[18]] + "', " +
-	"Site_URL3='" + req.body[proparray[19]] + "', " +
-	"Alexa_Ranking3='" + req.body[proparray[20]] + "', " +
-	"Site_URL4='" + req.body[proparray[21]] + "', " +
-	"Alexa_Ranking4='" + req.body[proparray[22]] + "', " +
-	"CPA_Affiliate_Marketing='" + req.body[proparray[23]] + "', " +
-	"Site_Category1='" + req.body[proparray[24]] + "', " +
-	"Site_Category2='" + req.body[proparray[25]] + "', " +
-	"Site_Category3='" + req.body[proparray[26]] + "', " +
-	"Unique_Visitors_PM='" +req.body[proparray[27]] + "', " +
-	"News_Letter='" + req.body[proparray[28]] + "', " +
-	"Solo_Email='" + req.body[proparray[29]] + "', " +
-	"Sin_Dou_Optin='" + req.body[proparray[30]] + "', " +
-	"Mailing_Freq='" + req.body[proparray[31]] + "', " +
-	"Time_Record='" + req.body[proparray[32]] +
+	"Country='" + req.body[proparray[12]] + "', " +
+	"Zip='" + req.body[proparray[13]] + "', " +
+	"Site_URL1='" + req.body[proparray[14]] + "', " +
+	"Alexa_Ranking1='" + req.body[proparray[15]] + "', " +
+	"Site_URL2='" + req.body[proparray[16]] + "', " +
+	"Alexa_Ranking2='" + req.body[proparray[17]] + "', " +
+	"Site_URL3='" + req.body[proparray[18]] + "', " +
+	"Alexa_Ranking3='" + req.body[proparray[19]] + "', " +
+	"Site_URL4='" + req.body[proparray[20]] + "', " +
+	"Alexa_Ranking4='" + req.body[proparray[21]] + "', " +
+	"CPA_Affiliate_Marketing='" + req.body[proparray[22]] + "', " +
+	"Site_Category1='" + req.body[proparray[23]] + "', " +
+	"Site_Category2='" + req.body[proparray[24]] + "', " +
+	"Site_Category3='" + req.body[proparray[25]] + "', " +
+	"Unique_Visitors_PM='" +req.body[proparray[26]] + "', " +
+	"News_Letter='" + req.body[proparray[27]] + "', " +
+	"Solo_Email='" + req.body[proparray[28]] + "', " +
+	"Sin_Dou_Optin='" + req.body[proparray[29]] + "', " +
+	"Mailing_Freq='" + req.body[proparray[30]] + "', " +
+	"Time_Record='" + req.body[proparray[31]] +
 	"' WHERE Assigned_ID = " + req.body[proparray[i-1]] + ";"; 
+	console.log(sql);
 	pool.getConnection(function(err, connection){
 		connection.query(sql, function(err, fields){
 			if (err){
@@ -943,8 +989,13 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 		country = req.body[proparray[46]].substring(1, req.body[proparray[46]][0].length);
 		country = country[1];
 	}
-	console.log( req.body[proparray[47]]);
-
+	var parallel_universe = false;
+	if (req.body['tracking_pixel'] == null){
+		parallel_universe =  false;
+	} else {
+		parallel_universe = true;
+	}
+	console.log("parallel universe? " + parallel_universe);
 	var info = "INSERT INTO campaigns" + 
 						"(Cost_Per_Lead," +
 						"Cost_Per_Click," +
@@ -1056,14 +1107,19 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 		    console.log('did it:'  + fields.insertId);
 
 		    // get the advertiser_id of the row just inserted
-			sql1 = "SELECT Advertiser_ID FROM campaigns WHERE Assigned_ID = ?"
-		    connection.query(sql1, fields.insertId, function(err, rows){
-		    	
-		    	console.log(rows[0]);
+		    	if (parallel_universe == false){
+		    		var tracking_pixel = 
+			    	sql2 = 'UPDATE campaigns SET Tracking_Pixel="' + "<script type='text/javascript'> var ClickMeter_pixel_url = '//127.0.0.1:3000/pixel.gif?off_id=" + fields.insertId +"aff_id=" + req.body['add_id'] +"'; </script> <script type='text/javascript' id='cmpixelscript' src='//s3.amazonaws.com/scripts-clickmeter-com/js/pixelNew.js'></script> <noscript> <img height='0' width='0' alt='' src='http://127.0.0.1:3000/pixel.gif' /> </noscript>" +
+			    	'" WHERE Assigned_ID = ' + fields.insertId + ";";
+			    	console.log(sql2);
+			    	connection.query(sql2, function(err, rows){
+			    		if (err) console.log(err.message);
+			    	});
+		    	}
 		    	camp_id = fields.insertId;
-		    	advertiser_id = rows[0].Advertiser_ID;
+		    	advertiser_id = fields.insertId;
 		    	// create a folder with camp_id and advertiser_id to store banners.
-		    	path = "./uploads/banner-" + camp_id + "-" + advertiser_id;
+		    	path = "./views/admin/uploads/banner-" + camp_id + "-" + advertiser_id;
 
 				var mkdirSync = function (path) {
 					  try {
@@ -1091,8 +1147,6 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 					src.on('error', function(err) { res.render('affiliateCreateCampaign.ejs', { message: null }); });
 					}
 		    	
-		    	
-		    });
 						    
 		    connection.release();
 		    
@@ -1106,8 +1160,30 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 
 //----------------------------------------------------------------------------------------------//
 //---------------------------------pixel tracking handling--------------------------------------//
+// it is recommended to do the pixel tracking and image in a different server, but due to having
+// only one server, I will just use the same server for monitoring.
+app.get('/admin/uploads', function(req, res, err){
+	var camp_id = req.query.camp_id;
+	var advertiser_id = req.query.advertiser_id;
+	console.log(req.signedCookies['track']);
+	//console.log(req);
 
+});
+app.get('/tracking', function(req, res, err){
+	var off_id = req.query.off_id;
+	var aff_id = req.query.aff_id;
+
+	res.cookie("track", "o:" + off_id + ":a:" + aff_id, {signed: true, maxAge: 60 * 1000});
+
+	res.redirect('/admin/uploads?off_id=' + off_id + '&aff_id=' + aff_id);
+
+});
+
+// tracking pixel on Thank you page
 app.get('/pixel.gif', function(req, res, err){
+	console.log("???");
+
+	/* Browser type, ip, start time, session
 	var ua = req.headers['user-agent'],
     $ = {};
 
@@ -1132,38 +1208,60 @@ app.get('/pixel.gif', function(req, res, err){
 	if (/Windows NT/.test(ua))
     $.Windows = /Windows NT ([0-9\._]+)[\);]/.exec(ua)[1];
 
-	console.log(req.session);
-	console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-	console.log(req.startTime);
-
-
+	---------------------------------
+	---> console.log(req.session);
+	---------------------------------
+	---> console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+	---------------------------------
+	---> console.log(req.startTime);
+	*/
 ///////////////////////////////////////////////////////////////////////////////////////////////
 	// put this as one of the first middleware so it acts 
 	// before other middleware spends time processing the request
-	var countip = false;
-	console.log(accesses.check(req.connection.remoteAddress));
+	//
+	// -- It is not wroking as intended
+	var countip = true;
+	/*console.log(accesses.check(req.connection.remoteAddress));
 	if (accesses.check(req.connection.remoteAddress)){
 		countip = true;
-	}
+	}*/
 //////////////////////////////////////////////////////////////////////////////////////////////
 	// count the clicks in mysql
 	// make sure one ip address only counts once
-	offer_id = req.query.offer_id;
-	aff_id = req.query.aff_id;
+	var add_id = req.query.add_id;
+	var off_id0 = req.query.off_id;
+
 
 	//var sql2 = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE Table_Name = 'campaigns' AND COLUMN_NAME LIKE 'af%';"
-	if (countip){
-	var sql = "UPDATE campaigns SET Unique_Click = Unique_Counts + 1 WHERE Offer_ID = " + offer_id + ";";
-	pool.getConnection(function(err, connection){
-		connection.query(sql, function(err, rows){
-			console.log("sucess:", rows);
-			connection.release();
-		});
-	});
+	var cookie = req.signedCookies['track'];
+	var off_id;
+	var aff_id;
+	console.log("cookie" + cookie);
+	if (cookie){
+		off_id = cookie.split(':')[1];
+		aff_id = cookie.split(':')[3];
+		console.log("in: " + off_id, off_id0);
+		if (off_id == off_id0){
+
+			if (countip){
+				var sql = "UPDATE affiliate_offers SET Sales_Actions = Sales_Actions + 1 WHERE Offer_ID = " + off_id + " AND Affiliate_ID = " + aff_id + ";";
+				var sql1 = "UPDATE campaigns SET Total_Leads/Sales = Total_Leads/Sales + 1 WHERE Offer_ID = " + off_id + " AND Affiliate_ID = " + aff_id + ";";
+				var sql2 = "SELECT Total_Leads/Sales, Offered_Leads, Offered_Sales FROM campaigns WHERE Offer_ID = " + off_id + " AND Affiliate_ID = " + aff_id + ";";
+				console.log(sql);
+				pool.getConnection(function(err, connection){
+					connection.query(sql, function(err, rows){
+						console.log("sucess:", rows);
+						res.clearCookie("track");
+						res.sendFile("views/pixel.html", {root: __dirname});
+						connection.release();
+					});
+				});
+			}
+		}
 	}
-	
-	res.sendFile("views/pixel.html", {root: __dirname});
+
 });
+
 
 // Data Structure For Unique IP Count.
 function AccessLogger(blockTime) {
