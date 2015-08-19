@@ -36,6 +36,7 @@ var multer  = require('multer');
 var path = require('path');     //used for file path
 var fs = require('fs-extra'); 
 
+var open = require('open');
 
 app.use(morgan('dev'));
 //app.use(cookieParser());
@@ -43,7 +44,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/views'));
 app.get('/',function(req,res){
-  res.render('Signup_Application.ejs', { message: '' });
+  res.render('Signup_Application2.ejs', { message: '' });
 });
 app.use(cookieParser('secret'));
 var upload = multer({ dest: './uploads/' });
@@ -62,11 +63,11 @@ io.on("connection", function(socket){
 		var sql = '';
 		if (data.message == '1'){
 			sql = "SELECT First_Name, Last_Name, Company, SSN_TAX_ID, Site_URL1, Site_Category1," +
-			"Address1, City, State, State2, Country, Zip, Phone, Assigned_ID FROM client_info " +
+			"Address1, City, State, Country, Zip, Phone, Assigned_ID FROM client_info " +
 			"WHERE approved = 0;";
 		} else {
 			sql = "SELECT First_Name, Last_Name, Email, Company, SSN_TAX_ID, Site_URL1, Site_Category1," +
-			"Address1, City, State, State2, Country, Zip, Phone, Assigned_ID FROM client_info " +
+			"Address1, City, State, Country, Zip, Phone, Assigned_ID FROM client_info " +
 			"WHERE approved = 1;";
 		}
 		pool.getConnection(function(err, connection) {
@@ -133,6 +134,26 @@ io.on("connection", function(socket){
 		console.log("approveing request sent");
 		sql = "UPDATE client_info SET approved = 1 WHERE Assigned_ID = " + id.ID + ";";
 		sql2 = "SELECT Email FROM client_info WHERE Assigned_ID = " + id.ID + ";";
+		sql3 = "CREATE TABLE affiliate" + id.ID + " (" +
+			"Name VARCHAR(50) NOT NULL," +
+			"Offer_ID INT(10) NOT NULL," +
+			"Affiliate_ID INT(10) NOT NULL," +
+			"Advertiser_ID INT(10) NOT NULL," +
+			"Tracking_Link TEXT," + 
+			"Total_Payout INT(11) NOT NULL DEFAULT '0'," + 
+			"Payout_Limit INT(11) NOT NULL DEFAULT '0'," + 
+			"Clicks INT(10) NOT NULL DEFAULT '0'," +
+			"Leads INT(10) NOT NULL DEFAULT '0'," + 
+			"Sales INT(10) NOT NULL DEFAULT '0'," + 
+			"Payout_Clicks VARCHAR(10) NOT NULL DEFAULT '0'," + 
+			"Payout_Leads VARCHAR(10) NOT NULL DEFAULT '0'," + 
+			"Payout_Sales VARCHAR(10) NOT NULL DEFAULT '0'," + 
+			"Clicks_Limit INT(10) NOT NULL DEFAULT '0'," + 
+			"Leads_Limit INT(10) NOT NULL DEFAULT '0'," + 
+			"Sales_Limit INT(10) NOT NULL DEFAULT '0'," + 
+			"Start_Date DATE NOT NULL," + 
+			"Expire_Date DATE NOT NULL)" ;
+
 		pool.getConnection(function(err, connection){
 			connection.query(sql, function selectCb(err, results, fields) {
 				if (err){
@@ -171,8 +192,14 @@ io.on("connection", function(socket){
 					}, function(err, message) { console.log(err || message); });
 
 				}
-				connection.release();
+				
 			});
+			connection.query(sql3, function (err, rows){
+				if (err) console.log(err.message);
+
+			});
+			
+			connection.release();
 		});
 	});
 	//// advertiser approve
@@ -428,7 +455,7 @@ passport.use(
 );
 
 app.post('/login', passport.authenticate('local-login', {
-	successRedirect: '/offers',
+	successRedirect: '/myoffers',
 	failureRedirect: '/login',
 	failureFlash: true
 }));
@@ -482,7 +509,7 @@ app.post('/login_ad', passport.authenticate('local-login-ad', {
 
 ////  Affiliate Signup
 app.get('/signup', function(req, res, err){
-	res.render('Signup_Application.ejs', { message: req.flash('signupMessage') });
+	res.render('Signup_Application2.ejs', { message: req.flash('signupMessage') });
 });
 
 passport.use(
@@ -498,7 +525,7 @@ passport.use(
 			for (var prop in req.body){
 				proparray.push(prop);
 			}
-			console.log(proparray.length + 2);
+			console.log(req.body);
 			for (var i = 0; i < proparray.length; i++){
 				if (req.body[proparray[i]] == '' || req.body[proparray[i]] == 'http://' || req.body[proparray[i] == undefined]){
 					req.body[proparray[i]] = null;
@@ -518,33 +545,26 @@ passport.use(
 						var info = "INSERT INTO client_info" + 
 						"(First_Name," +
 						"Last_Name," +
-						"Password," +
-						"Company," + 
-						"Checks_To," + 
 						"SSN_TAX_ID," +
-						"Payment_Threshhold," + 
+						"Company," + 
 						"Email," + 
 						"Phone," + 
 						"Address1," + 
 						"Address2," + 
 						"City," + 
 						"State," +
-						"State2," +
-						"Country," + 
 						"Zip," + 
-						"AIM," + 
-						"Site_URL1," + 
-						"Alexa_Ranking1," + 
-						"Site_URL2," + 
-						"Alexa_Ranking2," + 
-						"Site_URL3," + 
-						"Alexa_Ranking3," + 
-						"Site_URL4," + 
-						"Alexa_Ranking4," + 
+						"Country," + 
+						"Password," +
+						"Checks_To," + 
 						"CPA_Affiliate_Marketing," + 
+						"Site_URL1," + 
+						"Site_URL2," + 
+						"Site_URL3," + 
+						"Site_URL4," +
 						"Site_Category1," + 
 						"Site_Category2," + 
-						"Site_Category3," + 
+						"Site_Category3," +  
 						"Unique_Visitors_PM," +
 						"Source_of_Site_Analytics," + 
 						"CP_PPC," +
@@ -558,12 +578,12 @@ passport.use(
 						"Solo_Email," + 
 						"Sin_Dou_Optin," + 
 						"Mailing_Freq," + 
-						"Time_Record)" +
+						"Time_Record)" + 
 						" VALUES " +
 						"(" + 
 						'"' + req.body[proparray[1]] + '",' +
 						'"' + req.body[proparray[2]] + '",' +
-						'"' + bcrypt.hashSync(req.body[proparray[3]], null, null) + '",'+
+						'"' + req.body[proparray[3]] + '",' +
 						'"' + req.body[proparray[4]] + '",' +
 						'"' + req.body[proparray[5]] + '",' + 
 						'"' + req.body[proparray[6]] + '",' +
@@ -573,7 +593,7 @@ passport.use(
 						'"' + req.body[proparray[10]] + '",' +
 						'"' + req.body[proparray[11]] + '",' + 
 						'"' + req.body[proparray[12]] + '",' + 
-						'"' + req.body[proparray[13]] + '",' +
+						'"' + bcrypt.hashSync(req.body[proparray[13]], null, null) + '",'+
 						'"' + req.body[proparray[14]] + '",' + 
 						'"' + req.body[proparray[15]] + '",' +
 						'"' + req.body[proparray[16]] + '",' + 
@@ -596,14 +616,7 @@ passport.use(
 						'"' + req.body[proparray[33]] + '",' + 
 						'"' + req.body[proparray[34]] + '",' +
 						'"' + req.body[proparray[35]] + '",' +
-						'"' + req.body[proparray[36]] + '",' + 
-						'"' + req.body[proparray[37]] + '",' +
-						'"' + req.body[proparray[38]] + '",' +
-						'"' + req.body[proparray[39]] + '",' + 
-						'"' + req.body[proparray[40]] + '",' +
-						'"' + req.body[proparray[41]] + '",' +
-						'"' + req.body[proparray[42]] + '",' +
-						'"' + req.body[proparray[43]] + 
+						'"' + req.body[proparray[36]] + 
 						'");';
 
 						console.log(info);
@@ -774,12 +787,68 @@ app.get("/offers", loggedin, function(req, res, err){
 	}
 });
 
+app.get("/myoffers", loggedin, function(req, res, err){
+	if (req.session.passport.Identity != 'ad'){
+		console.log(req.session.passport.user.num);
+		var sql = "SELECT * FROM affiliate" + req.session.passport.user.num + ";";
+		console.log(sql);
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function(err, rows){
+				var id_list = [];
+				if (rows){
+					for (var i = 0; i < rows.length; i ++){
+						id_list.push('/getoffer?off_id=' + rows[i].Offer_ID);
+					}
+					res.render('affiliateCampaignsDescription2.ejs', { message: rows, toni: id_list});
+					
+				} else {
+					res.render('affiliateCampaignsDescription2.ejs', { message: null, toni: null});
+				}
+				connection.release();
+			});
+		});
+	} else{
+		res.render('affiliateLogin.ejs', { message: null });
+	}
+});
+
+app.get("/getoffer", loggedin, function(req, res, err){
+	if (req.session.passport.Identity != 'ad'){
+		console.log(req.session.passport.user.num);
+		var off_id = req.query.off_id;
+		var sql = "SELECT * FROM affiliate" + req.session.passport.user.num + " WHERE Offer_ID = " + off_id + ";";
+		var sql1 = "SELECT Long_D, Affiliate_Per_Affiliate, Start_Date, End_Date FROM campaigns WHERE Assigned_ID = " + off_id + ";"; 
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function selecCb(err, rows){
+				if(err) console.log(err.message);
+				connection.query(sql1, function(err, fields){
+					if(err) console.log(err.message);
+					var link = "http://192.168.0.22:3000/tracking?off_id=" + rows[0].Offer_ID + "&aff_id=" + rows[0].Affiliate_ID;
+					var path = "./views/admin/uploads/banner-" + rows[0].Offer_ID + "-" + rows[0].Advertiser_ID;
+					var link2 = "http://192.168.0.22:3000/upload?camp_id="+ rows[0].Offer_ID + "&advertiser_id=" + rows[0].Advertiser_ID + "&name=";
+					var files = fs.readdirSync(path);
+					var len = files.length;
+					var imagelink = [];
+					for (i in files){
+						imagelink.push("<a href='" + link + "'>" + "<img src='" + link2 + files[i] + "'>" + "</a>");
+					}
+					console.log(imagelink);
+					res.render('affiliateCampaignDeployment.ejs', { message: rows , campaign: fields, trackinglink: link, imagelink: imagelink});
+				});
+				connection.release();
+			});
+		});
+	} else{
+		res.render('affiliateLogin.ejs', { message: null });
+	}
+});
+
+
 app.post('/Apply_Offers', function(req, res, err){
 	var proparray = [];
 	for (var prop in req.body){
 		proparray.push(prop);
 	}
-	
 	var sql = "SELECT Offers_Num, Offers_Pending, Offers_Limit FROM client_info WHERE Assigned_ID = "+ req.user.Assigned_ID +";";
 	console.log(sql);
 	pool.getConnection(function(err, connection){
@@ -819,10 +888,6 @@ app.post('/Apply_Offers', function(req, res, err){
 			connection.release();
 		});
 	});
-	
-
-	//res.redirct('/offers');
-	
 });
 
 
@@ -983,10 +1048,10 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 			req.body[proparray[i]] = null;
 		}	
 	}
-	// special case for no.46 entry
-	var country = req.body[proparray[46]];
-	if (req.body[proparray[46]] != null && req.body[proparray[46]][0] == ','){
-		country = req.body[proparray[46]].substring(1, req.body[proparray[46]][0].length);
+	// special case for no.47 entry
+	var country = req.body[proparray[47]];
+	if (req.body[proparray[47]] != null && req.body[proparray[47]][0] == ','){
+		country = req.body[proparray[47]].substring(1, req.body[proparray[47]][0].length);
 		country = country[1];
 	}
 	var parallel_universe = false;
@@ -1018,6 +1083,7 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 						"Offered_Sales," + 
 						"Offered_Impressions," + 
 						"Offered_CoRegi," + 
+						"Affiliate_Per_Affiliate," + 
 						"Affiliate_Per_Click," + 
 						"Affiliate_Lead_PC," + 
 						"Affiliate_Impression_PC," + 
@@ -1093,8 +1159,9 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 						'"' + req.body[proparray[43]] + '",' +
 						'"' + req.body[proparray[44]] + '",' +
 						'"' + req.body[proparray[45]] + '",' +
+						'"' + req.body[proparray[46]] + '",' +
 						'"' + country + '",' +
-						'"' + req.body[proparray[47]] + 
+						'"' + req.body[proparray[48]] + 
 						'");';
 	console.log(info);
 	var camp_id = 2;
@@ -1162,26 +1229,46 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 //---------------------------------pixel tracking handling--------------------------------------//
 // it is recommended to do the pixel tracking and image in a different server, but due to having
 // only one server, I will just use the same server for monitoring.
-app.get('/admin/uploads', function(req, res, err){
+app.get('/upload', function(req, res, err){
+	console.log("get the images");
 	var camp_id = req.query.camp_id;
 	var advertiser_id = req.query.advertiser_id;
+	var name = req.query.name;
 	console.log(req.signedCookies['track']);
+	var path = "./views/admin/uploads/banner-" + camp_id + "-" + advertiser_id + "/" + name;
+	console.log(path);
+	res.sendFile(path, {root: __dirname});
 	//console.log(req);
-
 });
 app.get('/tracking', function(req, res, err){
 	var off_id = req.query.off_id;
 	var aff_id = req.query.aff_id;
-
-	res.cookie("track", "o:" + off_id + ":a:" + aff_id, {signed: true, maxAge: 60 * 1000});
-
-	res.redirect('/admin/uploads?off_id=' + off_id + '&aff_id=' + aff_id);
-
+	var sql = "SELECT Url FROM campaigns WHERE Assigned_ID = " + off_id + ";";
+	var sql1 = "UPDATE affiliate" + aff_id + " SET Clicks = Clicks + 1 WHERE Offer_ID = " + off_id + ";";
+	pool.getConnection(function(err, connection)
+		connection.query(sql1, function (err, rows){
+			if (err) console.log(err.message);
+		});
+		connection.query(sql, function (err, rows){
+			if (err) console.log(err.message);
+			res.cookie("track", "o:" + off_id + ":a:" + aff_id, {signed: true, maxAge: 180 * 24 * 60 * 60 * 1000});
+			var url = rows[0].Url;
+			console.log(url);
+			if (url.substring(0,7) == 'http://'){
+				res.redirect(rows[0].Url);
+				console.log(url.substring(0,7));
+			} else {
+				res.redirect('http://' + rows[0].Url);
+				console.log(url.substring(0,7));
+			}
+			
+		});
+		connection.release();
+	})
 });
 
 // tracking pixel on Thank you page
 app.get('/pixel.gif', function(req, res, err){
-	console.log("???");
 
 	/* Browser type, ip, start time, session
 	var ua = req.headers['user-agent'],
@@ -1244,13 +1331,41 @@ app.get('/pixel.gif', function(req, res, err){
 		if (off_id == off_id0){
 
 			if (countip){
-				var sql = "UPDATE affiliate_offers SET Sales_Actions = Sales_Actions + 1 WHERE Offer_ID = " + off_id + " AND Affiliate_ID = " + aff_id + ";";
-				var sql1 = "UPDATE campaigns SET Total_Leads/Sales = Total_Leads/Sales + 1 WHERE Offer_ID = " + off_id + " AND Affiliate_ID = " + aff_id + ";";
-				var sql2 = "SELECT Total_Leads/Sales, Offered_Leads, Offered_Sales FROM campaigns WHERE Offer_ID = " + off_id + " AND Affiliate_ID = " + aff_id + ";";
+
+				var sql = "UPDATE affiliate" + aff_id + " SET Leads = Leads + 1 WHERE Offer_ID = " + off_id + ";";
+				var sql_s = "UPDATE affiliate" + aff_id + " SET Sales = Sales + 1 WHERE Offer_ID = " + off_id + ";";
+				
+				var sql1 = "UPDATE campaigns SET Total_Lead = Total_Leads + 1 WHERE Assigned_ID = " + off_id + ";";
+				var sql2 = "UPDATE campaigns SET Total_Sales = Total_Sales + 1 WHERE Assigned_ID = " + off_id + ";";
+				
+				var sql3 = "SELECT Cost_Per_Lead, Cost_Per_Sale, Total_Leads, Total_Sales, Offered_Leads, Offered_Sales FROM campaigns WHERE Assigned_ID = " + off_id + ";";
 				console.log(sql);
 				pool.getConnection(function(err, connection){
-					connection.query(sql, function(err, rows){
-						console.log("sucess:", rows);
+					connection.query(sql3, function selectCb(err, rows, fields){
+						if (err) console.log(err.message);
+						// if clicks per lead
+						if (rows[0].Cost_Per_Lead != 'null'){
+							connection.query(sql1, function(err, rows){
+								if (err) console.log(err.message);
+								console.log("Style: Cost Per Lead");
+								connection.query(sql, function(err, rows){
+									if (err) console.log(err.message);
+									console.log("Style: Cost Per Lead, all info added");
+								});								
+							});
+						}
+						// if clicks per action
+						if (rows[0].Cost_Per_Sale != 'null'){
+							connection.query(sql2, function(err, rows){
+								if (err) console.log(err.message);
+								console.log("Style: Cost Per Sale");
+								connection.query(sql_s, function(err, rows){
+									if (err) console.log(err.message);
+									console.log("Style: Cost Per Sale, clicks added");
+								});
+							});
+						}
+						console.log("success:", rows[0]);
 						res.clearCookie("track");
 						res.sendFile("views/pixel.html", {root: __dirname});
 						connection.release();
@@ -1325,8 +1440,6 @@ AccessLogger.prototype = {
 
 //block for 6 hours 
 var accesses = new AccessLogger(6 * 60 * 60 * 1000);
-
-
 
 http.listen(3000, function(){
   console.log("Started on PORT 3000");

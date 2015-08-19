@@ -1,0 +1,515 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Affiliate Website</title>
+        <link href="css/styles.css" rel="stylesheet" type="text/css">
+        <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js
+        "></script>
+        
+        <!-- <script type='text/javascript'> var ClickMeter_pixel_url = '//127.0.0.1:3000/pixel.gif?off_id=35&aff_id=71'; </script> <script type='text/javascript' id='cmpixelscript' src='//s3.amazonaws.com/scripts-clickmeter-com/js/pixelNew.js'></script> <noscript> <img height='0' width='0' alt='' src='http://127.0.0.1:3000/pixel.gif' /> </noscript> -->
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <!-- Wrap all page content here -->
+        <div id="wrap">
+            
+            <!-- Fixed navbar -->
+            <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="#">MEDIA Company</a>
+                    </div>
+                    <!--
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav navbar-nav">
+                            <li class="active"><a href="#">Home</a></li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Offers<b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">All Offers</a></li>
+                                    <li><a href="#">Offers by Category</a></li>
+                                    <li><a href="#">Search All Offers</a></li>
+                                    <li><a href="#">Exclusives</a></li>
+                                    <li><a href="#">Search Offers</a></li>
+                                    <li><a href="#">Email and Zip Submits</a></li>
+                                    <li><a href="#">Seasonal</a></li>
+                                </ul>
+                            </li>
+                            
+                            <li><a href="#camp">Campaigns</a></li>
+                            <li><a href="#tools">Tools</a></li>
+                            <li><a href="#about">About</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        </ul>
+                    </div>/.nav-collapse -->
+                </div>
+            </div>
+            
+            <!-- Begin page content -->
+            <div class="container">
+                <div class="page-header">
+                    <h2>Signup</h2>
+                </div>
+                <div class="content">
+                    
+                    <div class="firstArea panel panel-default">
+                        <div class="row">
+                            <div class="col-xs-12 padding">
+                                <div align="center">
+                                    <br>
+                                    <% if (message.length > 0) { %>
+                                    <div class="alert alert-danger"><%= message %></div>
+                                    <% } %>
+                                    <span class="headline-dark">Affiliate Sign Up</span><br>
+                                    <br>
+                                    <div style="align:center;">
+                                        <p>If you are interested in becoming a PrimaryAds affiliate, please fill out the form below. Note that only affiliates who demonstrate the ability to drive high-volume, high-quality traffic will be accepted into the PrimaryAds Network.</p>
+                                        <br />
+                                    </div>
+                                    <form data-toggle="validator" role="form" name=frm1 method="POST" action="signup" style="padding-top:20px">
+                                        <input type="hidden" name="image" value="#">
+                                        <!-- FIRST NAME -->
+                                        <div class="row">
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="First Name" name="name" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- LAST NAME -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Last Name" name="name2" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <!-- SSN/TAX ID -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[0-9]{1,}$" maxlength="9" data-minlength="9" class="form-control" placeholder="SSN/TAX ID" name="taxid" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- COMPANY -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Company" name="company" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <!-- EMAIL -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="email" maxlength="50" class="form-control" placeholder="Email" name="email" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- PHONE -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" data-minlength="10" pattern="^[0-9]{1,}$" maxlength="15" class="form-control" placeholder="Phone" name="phone" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <!-- ADDRESS -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Address" name="address" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- ADDRESS 2 -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Address 2" name="address2" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <!-- CITY-->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="City" name="city" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- STATE -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <select name="state" class="form-control">
+                                                        <option value="">Choose a State</option>
+                                                        <option value="00"> N/A </option><option value="AL">ALABAMA </option><option value="AK">ALASKA </option><option value="AZ">ARIZONA </option><option value="AR">ARKANSAS </option><option value="CA">CALIFORNIA </option><option value="CO">COLORADO </option><option value="CT">CONNECTICUT </option><option value="DE">DELAWARE </option><option value="DC">DISTRICT OF COLUMBIA </option><option value="FL">FLORIDA </option><option value="GA">GEORGIA </option><option value="HI">HAWAII </option><option value="ID">IDAHO </option><option value="IL">ILLINOIS </option><option value="IN">INDIANA </option><option value="IA">IOWA </option><option value="KS">KANSAS </option><option value="KY">KENTUCKY </option><option value="LA">LOUISIANA </option><option value="ME">MAINE </option><option value="MD">MARYLAND </option><option value="MA">MASSACHUSETTS </option><option value="MI">MICHIGAN </option><option value="MN">MINNESOTA </option><option value="MS">MISSISSIPPI </option><option value="MO">MISSOURI </option><option value="MT">MONTANA </option><option value="NE">NEBRASKA </option><option value="NV">NEVADA </option><option value="NH">NEW HAMPSHIRE </option><option value="NJ">NEW JERSEY </option><option value="NM">NEW MEXICO </option><option value="NY">NEW YORK </option><option value="NC">NORTH CAROLINA </option><option value="ND">NORTH DAKOTA </option><option value="OH">OHIO </option><option value="OK">OKLAHOMA </option><option value="OR">OREGON </option><option value="PA">PENNSYLVANIA </option><option value="RI">RHODE ISLAND </option><option value="SC">SOUTH CAROLINA </option><option value="SD">SOUTH DAKOTA </option><option value="TN">TENNESSEE </option><option value="TX">TEXAS </option><option value="UT">UTAH </option><option value="VT">VERMONT </option><option value="VA">VIRGINIA </option><option value="WA">WASHINGTON </option><option value="WV">WEST VIRGINIA </option><option value="WI">WISCONSIN </option><option value="WY">WYOMING </option>
+                                                    </select>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <!-- ZIP-->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[0-9]{1,}$" maxlength="5" data-minlength="5" class="form-control" placeholder="Zip" name="zip" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- COUNTRY-->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <select name="country" class="form-control">
+                                                        <option value="">Choose</option>
+                                                        <option value="AFGHANISTAN">AFGHANISTAN </option><option value="ALBANIA">ALBANIA </option><option value="ALGERIA">ALGERIA </option><option value="AMERICAN SAMOA">AMERICAN SAMOA </option><option value="ANDORRA">ANDORRA </option><option value="ANGOLA">ANGOLA </option><option value="ANGUILLA">ANGUILLA </option><option value="ANTARCTICA">ANTARCTICA </option><option value="ANTIGUA AND BARBUDA">ANTIGUA AND BARBUDA </option><option value="ARGENTINA">ARGENTINA </option><option value="ARMENIA">ARMENIA </option><option value="ARUBA">ARUBA </option><option value="AUSTRALIA">AUSTRALIA </option><option value="AUSTRIA">AUSTRIA </option><option value="AZERBAIJAN">AZERBAIJAN </option><option value="BAHAMAS">BAHAMAS </option><option value="BAHRAIN">BAHRAIN </option><option value="BANGLADESH">BANGLADESH </option><option value="BARBADOS">BARBADOS </option><option value="BELARUS">BELARUS </option><option value="BELGIUM">BELGIUM </option><option value="BELIZE">BELIZE </option><option value="BENIN">BENIN </option><option value="BERMUDA">BERMUDA </option><option value="BHUTAN">BHUTAN </option><option value="BOLIVIA">BOLIVIA </option><option value="BOSNIA AND HERZEGOVINA">BOSNIA AND HERZEGOVINA </option><option value="BOTSWANA">BOTSWANA </option><option value="BOUVET ISLAND">BOUVET ISLAND </option><option value="BRAZIL">BRAZIL </option><option value="BRITISH INDIAN OCEAN TERRITORY">BRITISH INDIAN OCEAN TERRITORY </option><option value="BRUNEI DARUSSALAM">BRUNEI DARUSSALAM </option><option value="BULGARIA">BULGARIA </option><option value="BURKINA FASO">BURKINA FASO </option><option value="BURUNDI">BURUNDI </option><option value="CAMBODIA">CAMBODIA </option><option value="CAMEROON">CAMEROON </option><option value="CANADA">CANADA </option><option value="CAPE VERDE">CAPE VERDE </option><option value="CAYMAN ISLANDS">CAYMAN ISLANDS </option><option value="CENTRAL AFRICAN REPUBLIC">CENTRAL AFRICAN REPUBLIC </option><option value="CHAD">CHAD </option><option value="CHILE">CHILE </option><option value="CHINA">CHINA </option><option value="COLOMBIA">COLOMBIA </option><option value="COMOROS">COMOROS </option><option value="CONGO">CONGO </option><option value="CONGO, THE DEMOCRATIC REPUBLIC OF THE">CONGO, THE DEMOCRATIC REPUBLIC OF THE </option><option value="COOK ISLANDS">COOK ISLANDS </option><option value="COSTA RICA">COSTA RICA </option><option value="COTE D'IVOIRE">COTE D'IVOIRE </option><option value="CROATIA">CROATIA </option><option value="CUBA">CUBA </option><option value="CYPRUS">CYPRUS </option><option value="CZECH REPUBLIC">CZECH REPUBLIC </option><option value="DENMARK">DENMARK </option><option value="DJIBOUTI">DJIBOUTI </option><option value="DOMINICA">DOMINICA </option><option value="DOMINICAN REPUBLIC">DOMINICAN REPUBLIC </option><option value="ECUADOR">ECUADOR </option><option value="EGYPT">EGYPT </option><option value="EL SALVADOR">EL SALVADOR </option><option value="EQUATORIAL GUINEA">EQUATORIAL GUINEA </option><option value="ERITREA">ERITREA </option><option value="ESTONIA">ESTONIA </option><option value="ETHIOPIA">ETHIOPIA </option><option value="FALKLAND ISLANDS (MALVINAS)">FALKLAND ISLANDS (MALVINAS) </option><option value="FAROE ISLANDS">FAROE ISLANDS </option><option value="FIJI">FIJI </option><option value="FINLAND">FINLAND </option><option value="FRANCE">FRANCE </option><option value="FRENCH GUIANA">FRENCH GUIANA </option><option value="FRENCH POLYNESIA">FRENCH POLYNESIA </option><option value="FRENCH SOUTHERN TERRITORIES">FRENCH SOUTHERN TERRITORIES </option><option value="GABON">GABON </option><option value="GAMBIA">GAMBIA </option><option value="GEORGIA">GEORGIA </option><option value="GERMANY">GERMANY </option><option value="GHANA">GHANA </option><option value="GIBRALTAR">GIBRALTAR </option><option value="GREECE">GREECE </option><option value="GREENLAND">GREENLAND </option><option value="GRENADA">GRENADA </option><option value="GUADELOUPE">GUADELOUPE </option><option value="GUAM">GUAM </option><option value="GUATEMALA">GUATEMALA </option><option value="GUERNSEY">GUERNSEY </option><option value="GUINEA">GUINEA </option><option value="GUYANA">GUYANA </option><option value="HAITI">HAITI </option><option value="HEARD ISLAND AND MCDONALD ISLANDS">HEARD ISLAND AND MCDONALD ISLANDS </option><option value="HOLY SEE (VATICAN CITY STATE)">HOLY SEE (VATICAN CITY STATE) </option><option value="HONDURAS">HONDURAS </option><option value="HONG KONG">HONG KONG </option><option value="HUNGARY">HUNGARY </option><option value="ICELAND">ICELAND </option><option value="INDIA">INDIA </option><option value="INDONESIA">INDONESIA </option><option value="IRAN, ISLAMIC REPUBLIC OF">IRAN, ISLAMIC REPUBLIC OF </option><option value="IRAQ">IRAQ </option><option value="IRELAND">IRELAND </option><option value="ISLE OF MAN">ISLE OF MAN </option><option value="ISRAEL">ISRAEL </option><option value="ITALY">ITALY </option><option value="JAMAICA">JAMAICA </option><option value="JAPAN">JAPAN </option><option value="JERSEY">JERSEY </option><option value="JORDAN">JORDAN </option><option value="KAZAKHSTAN">KAZAKHSTAN </option><option value="KENYA">KENYA </option><option value="KIRIBATI">KIRIBATI </option><option value="KOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF">KOREA, DEMOCRATIC PEOPLE'S REPUBLIC OF </option><option value="KOREA, REPUBLIC OF">KOREA, REPUBLIC OF </option><option value="KUWAIT">KUWAIT </option><option value="KYRGYZSTAN">KYRGYZSTAN </option><option value="LAO PEOPLE'S DEMOCRATIC REPUBLIC">LAO PEOPLE'S DEMOCRATIC REPUBLIC </option><option value="LATVIA">LATVIA </option><option value="LEBANON">LEBANON </option><option value="LESOTHO">LESOTHO </option><option value="LIBERIA">LIBERIA </option><option value="LIBYAN ARAB JAMAHIRIYA">LIBYAN ARAB JAMAHIRIYA </option><option value="LIECHTENSTEIN">LIECHTENSTEIN </option><option value="LITHUANIA">LITHUANIA </option><option value="LUXEMBOURG">LUXEMBOURG </option><option value="MACAO">MACAO </option><option value="MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF">MACEDONIA, THE FORMER YUGOSLAV REPUBLIC OF </option><option value="MADAGASCAR">MADAGASCAR </option><option value="MALAWI">MALAWI </option><option value="MALAYSIA">MALAYSIA </option><option value="MALDIVES">MALDIVES </option><option value="MALI">MALI </option><option value="MALTA">MALTA </option><option value="MARSHALL ISLANDS">MARSHALL ISLANDS </option><option value="MARTINIQUE">MARTINIQUE </option><option value="MAURITANIA">MAURITANIA </option><option value="MAURITIUS">MAURITIUS </option><option value="MAYOTTE">MAYOTTE </option><option value="MEXICO">MEXICO </option><option value="MICRONESIA, FEDERATED STATES OF">MICRONESIA, FEDERATED STATES OF </option><option value="MOLDOVA, REPUBLIC OF">MOLDOVA, REPUBLIC OF </option><option value="MONACO">MONACO </option><option value="MONGOLIA">MONGOLIA </option><option value="MONTENEGRO">MONTENEGRO </option><option value="MONTSERRAT">MONTSERRAT </option><option value="MOROCCO">MOROCCO </option><option value="MOZAMBIQUE">MOZAMBIQUE </option><option value="MYANMAR">MYANMAR </option><option value="NAMIBIA">NAMIBIA </option><option value="NAURU">NAURU </option><option value="NEPAL">NEPAL </option><option value="NETHERLANDS">NETHERLANDS </option><option value="NETHERLANDS ANTILLES">NETHERLANDS ANTILLES </option><option value="NEW CALEDONIA">NEW CALEDONIA </option><option value="NEW ZEALAND">NEW ZEALAND </option><option value="NICARAGUA">NICARAGUA </option><option value="NIGER">NIGER </option><option value="NIGERIA">NIGERIA </option><option value="NIUE">NIUE </option><option value="NORFOLK ISLAND">NORFOLK ISLAND </option><option value="NORTHERN MARIANA ISLANDS">NORTHERN MARIANA ISLANDS </option><option value="NORWAY">NORWAY </option><option value="OMAN">OMAN </option><option value="PAKISTAN">PAKISTAN </option><option value="PALAU">PALAU </option><option value="PANAMA">PANAMA </option><option value="PAPUA NEW GUINEA">PAPUA NEW GUINEA </option><option value="PARAGUAY">PARAGUAY </option><option value="PERU">PERU </option><option value="PHILIPPINES">PHILIPPINES </option><option value="PITCAIRN">PITCAIRN </option><option value="POLAND">POLAND </option><option value="PORTUGAL">PORTUGAL </option><option value="PUERTO RICO">PUERTO RICO </option><option value="QATAR">QATAR </option><option value="REUNION">REUNION </option><option value="ROMANIA">ROMANIA </option><option value="RUSSIAN FEDERATION">RUSSIAN FEDERATION </option><option value="RUSSIAN FEDERATION">RUSSIAN FEDERATION </option><option value="RWANDA">RWANDA </option><option value="SAINT KITTS AND NEVIS">SAINT KITTS AND NEVIS </option><option value="SAINT LUCIA">SAINT LUCIA </option><option value="SAINT VINCENT AND THE GRENADINES">SAINT VINCENT AND THE GRENADINES </option><option value="SAMOA">SAMOA </option><option value="SAN MARINO">SAN MARINO </option><option value="SAO TOME AND PRINCIPE">SAO TOME AND PRINCIPE </option><option value="SAUDI ARABIA">SAUDI ARABIA </option><option value="SENEGAL">SENEGAL </option><option value="SERBIA">SERBIA </option><option value="SERBIA AND MONTENEGRO">SERBIA AND MONTENEGRO </option><option value="SEYCHELLES">SEYCHELLES </option><option value="SIERRA LEONE">SIERRA LEONE </option><option value="SINGAPORE">SINGAPORE </option><option value="SLOVAKIA">SLOVAKIA </option><option value="SLOVENIA">SLOVENIA </option><option value="SOLOMON ISLANDS">SOLOMON ISLANDS </option><option value="SOMALIA">SOMALIA </option><option value="SOUTH AFRICA">SOUTH AFRICA </option><option value="SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS">SOUTH GEORGIA AND THE SOUTH SANDWICH ISLANDS </option><option value="SPAIN">SPAIN </option><option value="SRI LANKA">SRI LANKA </option><option value="SUDAN">SUDAN </option><option value="SURINAME">SURINAME </option><option value="SWAZILAND">SWAZILAND </option><option value="SWEDEN">SWEDEN </option><option value="SWITZERLAND">SWITZERLAND </option><option value="SYRIAN ARAB REPUBLIC">SYRIAN ARAB REPUBLIC </option><option value="TAIWAN">TAIWAN </option><option value="TAJIKISTAN">TAJIKISTAN </option><option value="TANZANIA, UNITED REPUBLIC OF">TANZANIA, UNITED REPUBLIC OF </option><option value="THAILAND">THAILAND </option><option value="TOGO">TOGO </option><option value="TOKELAU">TOKELAU </option><option value="TONGA">TONGA </option><option value="TRINIDAD AND TOBAGO">TRINIDAD AND TOBAGO </option><option value="TUNISIA">TUNISIA </option><option value="TURKEY">TURKEY </option><option value="TURKMENISTAN">TURKMENISTAN </option><option value="TURKS AND CAICOS ISLANDS">TURKS AND CAICOS ISLANDS </option><option value="TUVALU">TUVALU </option><option value="UGANDA">UGANDA </option><option value="UKRAINE">UKRAINE </option><option value="UNITED ARAB EMIRATES">UNITED ARAB EMIRATES </option><option value="UNITED KINGDOM">UNITED KINGDOM </option><option value="UNITED STATES" selected>UNITED STATES </option><option value="UNITED STATES MINOR OUTLYING ISLANDS">UNITED STATES MINOR OUTLYING ISLANDS </option><option value="URUGUAY">URUGUAY </option><option value="UZBEKISTAN">UZBEKISTAN </option><option value="VANUATU">VANUATU </option><option value="VENEZUELA">VENEZUELA </option><option value="VIET NAM">VIET NAM </option><option value="VIRGIN ISLANDS, BRITISH">VIRGIN ISLANDS, BRITISH </option><option value="VIRGIN ISLANDS, U.S.">VIRGIN ISLANDS, U.S. </option><option value="WALLIS AND FUTUNA">WALLIS AND FUTUNA </option><option value="YEMEN">YEMEN </option><option value="ZAMBIA">ZAMBIA </option><option value="ZIMBABWE">ZIMBABWE </option>
+                                                    </select>
+                                                    <p style="font-size:10px">Please note that we verify your physical location using your IP address. We may deny applications we believe are fraudulent due to discrepancies in your stated location and the location assumed from your IP address.</p>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- OTHER--> <!--
+                                            <div class="form-group col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Other" name="state2" required>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                        <div class="row">
+                                            <!-- PASSWORD -->
+                                            
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="password" data-minlength="6" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Password" id="passwordToMatch" name="password" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="password" data-minlength="6" data-match="#passwordToMatch" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Password" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <!-- CHECKS PAYABLE TO -->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Checks Payable To" name="payto" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            
+                                            <div class="col-md-6">
+                                            </div>
+                                            <!-- CPA AFFILIATE MARKETING EXPERIENCE-->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <select name="experience" ID="experience" class="form-control">
+                                                        <option value="Highly experienced">Highly experienced</option>
+                                                        <option value="Some experience">Some experience</option>
+                                                        <option value="Traditional Affiliate Marketing experience only">Traditional Affiliate Marketing experience only</option>
+                                                        <option value="New to Affiliate Marketing" SELECTED>New to Affiliate Marketing</option>
+                                                    </select>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                        </div>
+                                        <!-- PAYMENT THRESHOLD -->
+                                        <!--
+                                        <div class="form-group has-feedback">
+                                            <div class="input-group">
+                                                <select name="lowlimit" class="form-control">
+                                                    <option value="100" SELECTED>$100</option>
+                                                    <option value="500">$500</option>
+                                                    <option value="1000">$1000</option>
+                                                </select>
+                                            </div>
+                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <span class="help-block with-errors"></span>
+                                        </div> -->
+                                        
+                                        
+                                        
+                                        
+                                        <!-- AIM-->
+                                        <!--
+                                        <div class="form-group has-feedback">
+                                            <div class="input-group">
+                                                <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="AIM" name="aim" required>
+                                            </div>
+                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <span class="help-block with-errors"></span>
+                                        </div> -->
+                                        
+                                        <div class="row">
+                                            <!-- SITE URL-->
+                                            <div class="form-group has-feedback col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[._A-z0-9]{1,}$" maxlength="50" class="form-control" placeholder="Site 1 URL" name="url" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div>
+                                            <!-- ALEXA RANKING-->
+                                            <!--
+                                            <div class="form-group has-feedback">
+                                                <div class="input-group">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Alexa Ranking" name="urlranking" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div> -->
+                                            <!-- SITE2 URL-->
+                                            <div class="form-group col-md-6">
+                                                <div class="input-group formWidth">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="50" class="form-control" placeholder="Site 2 URL" name="url2">
+                                                </div>
+                                            </div>
+                                            <!-- ALEXA2 RANKING-->
+                                            <!--
+                                            <div class="form-group has-feedback">
+                                                <div class="input-group">
+                                                    <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Alexa Ranking" name="urlranking2" required>
+                                                </div>
+                                                <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                <span class="help-block with-errors"></span>
+                                            </div> -->
+                                        </div>
+                                        
+                                        
+                                        
+                                        
+                                        <div class="row"><!-- SITE3 URL-->
+                                        <div class="form-group col-md-6">
+                                            <div class="input-group formWidth">
+                                                <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="59" class="form-control" placeholder="Site 3 URL" name="url3">
+                                            </div>
+                                        </div>
+                                        <!-- ALEXA3 RANKING-->
+                                        <!--
+                                        <div class="form-group has-feedback">
+                                            <div class="input-group">
+                                                <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Alexa Ranking" name="urlranking3" required>
+                                            </div>
+                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <span class="help-block with-errors"></span>
+                                        </div> -->
+                                        <!-- SITE4 URL-->
+                                        <div class="form-group">
+                                            <div class="input-group formWidth">
+                                                <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="50" class="form-control" placeholder="Site 4 URL" name="url4">
+                                            </div>
+                                        </div>
+                                        <!-- ALEXA4 RANKING-->
+                                        <!--
+                                        <div class="form-group has-feedback">
+                                            <div class="input-group">
+                                                <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Alexa Ranking" name="urlranking4" required>
+                                            </div>
+                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <span class="help-block with-errors"></span>
+                                        </div> -->
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <!-- SITE CATEGORIES1-->
+                                        <div class="form-group has-feedback col-md-6">
+                                            <div class="input-group formWidth">
+                                                <select name="cat1" class="butt-standard form-control">
+                                                    <option selected value="0">Select Category 1</option>
+                                                    <option value="Adult Dating">Adult Dating</option><option value="Adult Products">Adult Products</option><option value="As Seen on TV">As Seen on TV</option><option value="Automotive">Automotive</option><option value="B2B">B2B</option><option value="Babies">Babies</option><option value="Books">Books</option><option value="Cash Advance">Cash Advance</option><option value="Coffee">Coffee</option><option value="Dating">Dating</option><option value="Debt">Debt</option><option value="Diet">Diet</option><option value="Downloads">Downloads</option><option value="Education">Education</option><option value="Electronics">Electronics</option><option value="Entertainment">Entertainment</option><option value="Exclusive  One Field Zip/Email Offers">Exclusive  One Field Zip/Email Offers</option><option value="Exclusives">Exclusives</option><option value="Financial">Financial</option><option value="Free Trials">Free Trials</option><option value="Games">Games</option><option value="Grants">Grants</option><option value="Health and Fitness">Health and Fitness</option><option value="Holiday">Holiday</option><option value="Home and Garden">Home and Garden</option><option value="Home Business">Home Business</option><option value="Home Improvement">Home Improvement</option><option value="Incentives Permitted">Incentives Permitted</option><option value="Insurance">Insurance</option><option value="International">International</option><option value="Jewelry">Jewelry</option><option value="Kowabunga!/PrimaryAds Owned Exclusives">Kowabunga!/PrimaryAds Owned Exclusives</option><option value="Legal">Legal</option><option value="Magazines">Magazines</option><option value="Mobile Content">Mobile Content</option><option value="Mortgage">Mortgage</option><option value="One Field Email Offers">One Field Email Offers</option><option value="One Field Zip Code Offers">One Field Zip Code Offers</option><option value="Other">Other</option><option value="Pets">Pets</option><option value="Phones">Phones</option><option value="Products">Products</option><option value="Ringtones">Ringtones</option><option value="Scratch and Win">Scratch and Win</option><option value="Seasonal">Seasonal</option><option value="Services">Services</option><option value="Shopping">Shopping</option><option value="Spin and Win">Spin and Win</option><option value="Surveys">Surveys</option><option value="Taxes">Taxes</option><option value="Text Messages">Text Messages</option><option value="Think Partnership/PrimaryAds Owned Exclusives">Think Partnership/PrimaryAds Owned Exclusives</option><option value="Travel">Travel</option>
+                                                </select>
+                                            </div>
+                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <span class="help-block with-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <!-- SITE CATEGORIES2-->
+                                        <div class="form-group col-md-6">
+                                            <div class="input-group formWidth">
+                                                <select name="cat2" class="butt-standard form-control">
+                                                    <option selected value="0">Select Category 1</option>
+                                                    <option value="Adult Dating">Adult Dating</option><option value="Adult Products">Adult Products</option><option value="As Seen on TV">As Seen on TV</option><option value="Automotive">Automotive</option><option value="B2B">B2B</option><option value="Babies">Babies</option><option value="Books">Books</option><option value="Cash Advance">Cash Advance</option><option value="Coffee">Coffee</option><option value="Dating">Dating</option><option value="Debt">Debt</option><option value="Diet">Diet</option><option value="Downloads">Downloads</option><option value="Education">Education</option><option value="Electronics">Electronics</option><option value="Entertainment">Entertainment</option><option value="Exclusive  One Field Zip/Email Offers">Exclusive  One Field Zip/Email Offers</option><option value="Exclusives">Exclusives</option><option value="Financial">Financial</option><option value="Free Trials">Free Trials</option><option value="Games">Games</option><option value="Grants">Grants</option><option value="Health and Fitness">Health and Fitness</option><option value="Holiday">Holiday</option><option value="Home and Garden">Home and Garden</option><option value="Home Business">Home Business</option><option value="Home Improvement">Home Improvement</option><option value="Incentives Permitted">Incentives Permitted</option><option value="Insurance">Insurance</option><option value="International">International</option><option value="Jewelry">Jewelry</option><option value="Kowabunga!/PrimaryAds Owned Exclusives">Kowabunga!/PrimaryAds Owned Exclusives</option><option value="Legal">Legal</option><option value="Magazines">Magazines</option><option value="Mobile Content">Mobile Content</option><option value="Mortgage">Mortgage</option><option value="One Field Email Offers">One Field Email Offers</option><option value="One Field Zip Code Offers">One Field Zip Code Offers</option><option value="Other">Other</option><option value="Pets">Pets</option><option value="Phones">Phones</option><option value="Products">Products</option><option value="Ringtones">Ringtones</option><option value="Scratch and Win">Scratch and Win</option><option value="Seasonal">Seasonal</option><option value="Services">Services</option><option value="Shopping">Shopping</option><option value="Spin and Win">Spin and Win</option><option value="Surveys">Surveys</option><option value="Taxes">Taxes</option><option value="Text Messages">Text Messages</option><option value="Think Partnership/PrimaryAds Owned Exclusives">Think Partnership/PrimaryAds Owned Exclusives</option><option value="Travel">Travel</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <!-- SITE CATEGORIES3-->
+                                        <div class="form-group col-md-6">
+                                            <div class="input-group formWidth">
+                                                <select name="cat3" class="butt-standard form-control">
+                                                    <option selected value="0">Select Category 1</option>
+                                                    <option value="Adult Dating">Adult Dating</option><option value="Adult Products">Adult Products</option><option value="As Seen on TV">As Seen on TV</option><option value="Automotive">Automotive</option><option value="B2B">B2B</option><option value="Babies">Babies</option><option value="Books">Books</option><option value="Cash Advance">Cash Advance</option><option value="Coffee">Coffee</option><option value="Dating">Dating</option><option value="Debt">Debt</option><option value="Diet">Diet</option><option value="Downloads">Downloads</option><option value="Education">Education</option><option value="Electronics">Electronics</option><option value="Entertainment">Entertainment</option><option value="Exclusive  One Field Zip/Email Offers">Exclusive  One Field Zip/Email Offers</option><option value="Exclusives">Exclusives</option><option value="Financial">Financial</option><option value="Free Trials">Free Trials</option><option value="Games">Games</option><option value="Grants">Grants</option><option value="Health and Fitness">Health and Fitness</option><option value="Holiday">Holiday</option><option value="Home and Garden">Home and Garden</option><option value="Home Business">Home Business</option><option value="Home Improvement">Home Improvement</option><option value="Incentives Permitted">Incentives Permitted</option><option value="Insurance">Insurance</option><option value="International">International</option><option value="Jewelry">Jewelry</option><option value="Kowabunga!/PrimaryAds Owned Exclusives">Kowabunga!/PrimaryAds Owned Exclusives</option><option value="Legal">Legal</option><option value="Magazines">Magazines</option><option value="Mobile Content">Mobile Content</option><option value="Mortgage">Mortgage</option><option value="One Field Email Offers">One Field Email Offers</option><option value="One Field Zip Code Offers">One Field Zip Code Offers</option><option value="Other">Other</option><option value="Pets">Pets</option><option value="Phones">Phones</option><option value="Products">Products</option><option value="Ringtones">Ringtones</option><option value="Scratch and Win">Scratch and Win</option><option value="Seasonal">Seasonal</option><option value="Services">Services</option><option value="Shopping">Shopping</option><option value="Spin and Win">Spin and Win</option><option value="Surveys">Surveys</option><option value="Taxes">Taxes</option><option value="Text Messages">Text Messages</option><option value="Think Partnership/PrimaryAds Owned Exclusives">Think Partnership/PrimaryAds Owned Exclusives</option><option value="Travel">Travel</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <!-- UNIQUE VISITORS PER MONTH-->
+                                        <div class="form-group has-feedback col-md-6">
+                                            <div class="input-group formWidth">
+                                                <input type="text" pattern="^[0-9]{1,}$" maxlength="15" data-minlength="1" class="form-control" placeholder="Unique Visitors Per Month" name="visitors" required>
+                                            </div>
+                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <span class="help-block with-errors"></span>
+                                        </div>
+                                        
+                                        <!-- SOURCE OF SITE ANALYTICS-->
+                                        <div class="form-group has-feedback col-md-6">
+                                            <div class="input-group formWidth">
+                                                <input type="text" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="form-control" placeholder="Source of Site Analytics" name="analytics" id="analytics" required>
+                                            </div>
+                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <span class="help-block with-errors"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <!-- HOW WILL YOU PROMOTE OUR CAMPAIGNS-->
+                                        <div class="form-group col-md-6">
+                                            <div class="input-group formWidth">
+                                                <input type="hidden" name="chksite_desc1" value="">
+                                                <input type="checkbox" name="chksite_desc1" value="PPC" ID="chksite_desc1">PPC
+                                                <INPUT TYPE="text" NAME="monthlyspend" SIZE=10 maxlength=10 ID="monthlyspend" class=" input-md">Monthly Spend?
+                                                <input type="hidden" name="chksite_desc2" value="">
+                                                <input type="checkbox" name="chksite_desc2" value="SEO" ID="chksite_desc2">SEO
+                                                <input type="hidden" name="chksite_desc3" value="">
+                                                <input type="checkbox" name="chksite_desc3" value="Incentives" ID="chksite_desc3">Incentives
+                                                <input type="hidden" name="chksite_desc4" value="">
+                                                <input type="checkbox" name="chksite_desc4" value="Email" ID="chksite_desc4">Email
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <!-- OTHER -->
+                                        <div class="form-group col-md-6">
+                                            <div class="input-group formWidth">
+                                                <textarea cols="40" rows="5" name="site_desc" class="form-control input-md" placeholder="Other"></textarea>
+                                            </div>
+                                            
+                                        </div></div>
+                                        
+                                        <!-- DO YOU PUBLISH A NEWSLETTER-->
+                                        <div class="form-group">
+                                            <div class="input-group formWidth">
+                                                <tr><td align=right width=240>Do You Publish a Newsletter?</td>
+                                                <td align=left>No <input type=radio value="No" name="news_have" checked> &nbsp; Yes <input type=radio value="Yes" name="news_have"></td></tr>
+                                                
+                                                <tr><td colspan=2 align =center>(If Yes, Answer the Following:)<br></td></tr>
+                                                
+                                                <tr>
+                                                    <td align=left><INPUT placeholder="Number of Subscribers" TYPE="text" NAME="news_subs" SIZE=20 maxlength=20 pattern="^[0-9]{1,}$" class="form-control input-md" ></td></tr>
+                                                </div>
+                                            </div>
+                                            <!-- DO YOU SEND SOLO EMAIL-->
+                                            <div class="form-group">
+                                                <div class="input-group formWidth">
+                                                    <tr>
+                                                        <td align=right width=240>
+                                                            Do you send Solo email?
+                                                        </td>
+                                                        <td align=left>
+                                                            No <input type=radio value="No" name="news_solo" checked> &nbsp;
+                                                            Yes <input type=radio value="Yes" name="news_solo">
+                                                        </td>
+                                                    </tr>
+                                                </div>
+                                            </div>
+                                            <!-- SINGLE OR DOUBLE OPTIN-->
+                                            <div class="form-group">
+                                                <div class="input-group formWidth">
+                                                    <tr><td align=right width=240>Single or Double Optin?</td>
+                                                    <td align=left>
+                                                        Single <input type=radio value="Single" name="news_optin" checked> &nbsp;
+                                                        Double <input type=radio value="Double" name="news_optin">
+                                                    </td>
+                                                </div>
+                                            </div>
+                                            <!-- MAILING FREQUENCY-->
+                                            <div class="form-group">
+                                                <div class="input-group formWidth">
+                                                    <tr>
+                                                        <td align=left><INPUT TYPE="text" placeholder="Mailing Frequency" NAME="news_freq" SIZE=20 maxlength=20 class="form-control input-md"></td></tr>
+                                                    </div>
+                                                </div>
+                                                <!-- DO YOU RECORD TIME/DATE/IP STAMP-->
+                                                <div class="form-group">
+                                                    <div class="input-group formWidth">
+                                                        <tr><td align=right width=240>Do you record Time/Date/IP Stamp?</td>
+                                                        <td align=left>
+                                                            No <input type=radio value="No" name="news_stamp" checked> &nbsp;
+                                                            Yes <input type=radio value="Yes" name="news_stamp">
+                                                        </td>
+                                                        
+                                                    </div>
+                                                </div>
+                                                <!-- AGREEMENT-->
+                                                <div class="form-group has-feedback">
+                                                    <div class="input-group formWidth">
+                                                        <input type="checkbox" pattern="^[_A-z0-9]{1,}$" maxlength="15" class="" placeholder="Source of Site Analytics" name="agree" value="yes" data-error="Accept Agreement before Continuing" required>I have read and agree to the <a href="agreement.htm" target="_blank">Primary Ads Affiliate Agreement.</a>
+                                                    </div>
+                                                    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                                    <span class="help-block with-errors"></span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <script>$(function () {
+                    $('#accordion').on('shown.bs.collapse', function (e) {
+                    var offset = $('.panel.panel-default > .panel-collapse.in').offset();
+                    if(offset) {
+                    $('html,body').animate({
+                    scrollTop: $('.panel-title a').offset().top -50
+                    }, 500);
+                    }
+                    });
+                    });</script>
+                    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+                    <!-- <script src="/socket.io/socket.io.js"></script> -->
+                    <script src="js/control.js"></script>
+                    <script src="js/validator.js"></script>
+                    <script>
+                    $('.navbar .dropdown').hover(function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+                    }, function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
+                    });</script>
+                </body>
+            </html>

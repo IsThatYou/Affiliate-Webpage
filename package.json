@@ -20,6 +20,7 @@
     "multer": "^1.0.1",
     "mysql": "^2.7.0",
     "nodemailer": "^1.4.0",
+    "open": "0.0.5",
     "passport": "^0.2.2",
     "passport-local": "^1.0.0",
     "pixel-ping": "^0.1.3",
