@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var socket = io("http://192.168.0.22:3000/");
+    var socket = io("http://192.168.0.46:3000/");
     socket.emit("application info", {message: '0'});
 
     var totalUsers = 0;

@@ -1,6 +1,6 @@
 $(function() {
 	console.log('sssssssssssss');
-	var socket = io('http://192.168.0.22:3000/',  {
+	var socket = io('http://192.168.0.46:3000/',  {
 'sync disconnect on unload': true });
 	socket.on("aflogin", function(data){
 		

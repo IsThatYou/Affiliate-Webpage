@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
   <head>
     <title>Affiliate Website</title>
@@ -7,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js
     "></script>
+    
     <meta name="viewport" content="width=device-width, initial-scale=1">
   </head>
   <body>
@@ -39,6 +41,7 @@
                   <li><a href="#">Seasonal</a></li>
                 </ul>
               </li>
+              
               <li><a href="#camp">Campaigns</a></li>
               <li><a href="#tools">Tools</a></li>
               <li><a href="#about">About</a></li>
@@ -50,59 +53,24 @@
         
         <!-- Begin page content -->
         <div class="container">
-          <% if (mess.length > 0) { %>
-              <div class="alert alert-danger"><%= mess %></div>
-          <% } %>
           <div class="page-header">
-            <h2 id="campaignAmount">Campaigns</h2>
-            <p>Click on any Campaign Name to obtain sales tools/linking methods for that Campaign.</p>
+            <h2>Affiliates' Requests</h2>
           </div>
-        
-          <div class="paddingTop">
-            <div class="firstArea panel panel-default">
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Select</th>
-                    <th>Campaign ID</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Start Date</th>
-                    <th>Expire Date</th>
-                    <th>Short Description</th>
-                    <th>Payment Per Click</th>
-                  </tr>
-                </thead>
-                <form name=frm1 METHOD="Post" ACTION="Apply_Offers">
-                <tbody id="tableForCampaigns">
-                  <% for (i in message){ %>
-                      <tr id=<%=message[i].Assigned_ID%>><td><input type="checkbox" name=<%=message[i].Assigned_ID%> value=<%=message[i].Name%>></td><td>
-                      <%=message[i].Assigned_ID%> </td><td>
-                      <%=message[i].Name%> </td><td>
-                      <%=message[i].sel1%> </td><td>
-                      <%=message[i].Start_Date.toString().substring(3,15)%>  </td><td>
-                      <%=message[i].End_Date.toString().substring(3,15)%>  </td><td>
-                      <%=message[i].Short_D%>  </td><td>
-                      <%=message[i].Cost_Per_Click%>  </td>
-                  <% } %>
-                  
-                
-                </tbody>
-                
-              </table>
-
+          <div class="content" id="app-content">
+            
+              <!-- No.2-->
+              
             </div>
-            <input class="btn btn-info btn-md btn-block" type="submit" style="width:30%;" role="button" id="submitCampaign" value='Select Offers'>
-          </form>
           </div>
         </div>
-      </div>
-    </div>
+     
+
     <div id="footer">
       <div class="">
         <p class="text-muted credit">Footer <a href="#">Footer</a></p>
       </div>
     </div>
+    
     <script>$(function () {
     $('#accordion').on('shown.bs.collapse', function (e) {
     var offset = $('.panel.panel-default > .panel-collapse.in').offset();
@@ -113,13 +81,16 @@
     }
     });
     });</script>
-    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="js/loadCampaigns.js"></script>
+    
     <script>
     $('.navbar .dropdown').hover(function() {
     $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
     }, function() {
     $(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
-    });</script>
+    });</script> 
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/approval3.js"></script>
+
   </body>
 </html>

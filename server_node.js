@@ -92,11 +92,202 @@ io.on("connection", function(socket){
 	 	 });
 	  	});
 	});
+
+	// ----------------------the approval process for----------------------------//
+	// ----------------------campaigns/offers request ---------------------------//
+
+	socket.on("request info", function(data){
+		var sql = '';
+		
+		sql = "SELECT * FROM affiliate_pending_offers;";
+		
+		
+		pool.getConnection(function(err, connection) {
+	  	// Use the connection
+	  		connection.query(sql, function selectCb(err, results, fields) {
+	  		if (err){
+	  			console.log(err.message);
+	  		}
+	    // And done with the connection.
+	    	if (results.length > 0){
+
+		    	console.log("request_approval page updated");
+				socket.emit("request_info", {results:results});	
+	    	}
+	    	connection.release();
+	    // Don't use the connection here, it has been returned to the pool.
+	 	 });
+	  	});
+	});
+
+	socket.on("approve_offers", function(id){
+		sql = "SELECT * FROM campaigns WHERE Assigned_ID=" + id.Off_ID;
+		sql1 = "INSERT INTO affiliate" + id.Aff_ID + " (" +
+			"Name," +
+			"Offer_ID," +
+			"Affiliate_ID," +
+			"Advertiser_ID," +
+			"Payout_Limit," +
+			"Payout_Clicks," +
+			"Payout_Leads," +
+			"Payout_Sales," +
+			"Clicks_Limit," +
+			"Leads_Limit," +
+			"Sales_Limit," +
+			"Start_Date," +
+			"Expire_Date)" +
+			"VALUES (" +
+			"";
+
+
+		sql2 = "SELECT Email FROM advertiser_info WHERE Assigned_ID = " + id.ID + ";";
+		pool.getConnection(function(err, connection){
+			connection.query(sql, function selectCb(err, results, fields) {
+				if (err){
+					console.log(err.message);
+				}
+				if (results.length > 0){
+					console.log(results);
+					sql1 = "INSERT INTO affiliate" + id.Aff_ID + " (" +
+						"Name," +
+						"Offer_ID," +
+						"Affiliate_ID," +
+						"Advertiser_ID," +
+						"Payout_Limit," +
+						"Payout_Clicks," +
+						"Payout_Leads," +
+						"Payout_Sales," +
+						"Clicks_Limit," +
+						"Leads_Limit," +
+						"Sales_Limit," +
+						"Start_Date," +
+						"Expire_Date)" +
+						"VALUES (" +
+						'"' + results[0].Name + '",' +
+						'"' + id.Off_ID + '",' + 
+						'"' + results[0].Advertiser_ID + '",' + 
+						'"' + results[0].Affiliate_Per_Affiliate + '",' +
+						'"' + results[0].Affiliate_Per_Click + '",' +
+						'"' + results[0].Affiliate_Lead_PC + '",' +
+						'"' + results[0].Affiliate_Per_Sale + '",' +
+						'"' + results[0].Affiliate_Offered_Clicks + '",' +
+						'"' + results[0].Affiliate_Offered_Leads + '",' +
+						'"' + results[0].Affiliate_Offered_Sales + '",' +
+						'"' + results[0].Start_Date + '",' +
+						'"' + results[0].End_Date + 
+						'");';
+					connection.query(sql1, function(err, rows){
+						if (err) console.log(err.message);
+					});
+
+				}
+				
+			});
+			// Will test it when the server goes up
+			connection.query(sql2, function selectCb(err, results, fields) {
+				if (err){
+					console.log(err.message);
+				}
+				if (results.length > 0){
+					console.log(results[0].Email);
+					var to = results[0].Email;
+					var from = 'Affiliate_test@cminyc.com';
+					var emailserver = email.server.connect({
+					   user:    "Affiliate_test@cminyc.com", 
+					   password:"affiliate2015%", 
+					   // the host needs to be setup SMTP
+					   host:    "smtp.cminyc.com", 
+					   ssl:     false
+					});
+
+					emailserver.send({
+					   text:    "approved advertiser", 
+					   from:    from,
+					   //to
+					   to:      "me <jwang@cminyc.com>",
+					   cc:      "",
+					   subject: "testing emailjs"
+					}, function(err, message) { console.log(err || message); });
+
+				}
+				connection.release();
+			});
+		});
+	});
+	
+	// ------------------------------ the payout process ----------------------------//
+
+	socket.on("payout info", function(data){
+		aff_id = data.ID;
+		aff_id = '96';
+		sql = "SELECT * FROM affiliate" + aff_id + ";";
+		console.log(sql);
+		pool.getConnection(function(err, connection){
+			if (err) console.log(err.message);
+			connection.query(sql, function(err, rows){
+				if (err) console.log(err.message);
+				console.log(rows[0])
+				socket.emit("payout_info", {payout: rows});
+			})
+			connection.release();
+		})
+
+	});
+
+	socket.on("update payouts", function(data){
+		for (var i in data.message){
+			sql = "UPDATE affiliate" + data.message[i].Aff_ID + " SET " +
+			"Clicks=" + data.message[i].Clicks +
+			",Leads=" + data.message[i].lead +
+			",Sales=" + data.message[i].sales +
+			",Payout_Clicks=" + data.message[i].cpc +
+			",Payout_Leads=" + data.message[i].apc +
+			",Payout_Sales=" + data.message[i].spc +
+			" WHERE Offer_ID=" + data.message[i].Off_ID + ";";
+ 
+
+			console.log(sql);
+			pool.getConnection(function(err, connection){
+				if (err) console.log(err.message);
+				connection.query(sql, function(err, rows){
+					if (err) console.log(err.message);
+
+				})
+				connection.release();
+			})
+		}
+	});
+
+	socket.on("archive payouts", function(data){
+		for (var i in data.message){
+			sql = "INSERT INTO affiliate_archive" + data.message[i].Aff_ID + 
+			"Clicks=" + data.message[i].Clicks +
+			",Leads=" + data.message[i].lead +
+			",Sales=" + data.message[i].sales +
+			",Payout_Clicks=" + data.message[i].cpc +
+			",Payout_Leads=" + data.message[i].apc +
+			",Payout_Sales=" + data.message[i].spc +
+			" WHERE Offer_ID=" + data.message[i].Off_ID + ";";
+ 
+
+			console.log(sql);
+			pool.getConnection(function(err, connection){
+				if (err) console.log(err.message);
+				connection.query(sql, function(err, rows){
+					if (err) console.log(err.message);
+
+				})
+				connection.release();
+			})
+		}
+	});
+	// --------the approval process for advertisers & affiliates sign ups -----------//
+	//
 	socket.on("remove affiliate", function(data){
 		var id = data.ID;
 		sql = "DELETE FROM client_info WHERE Assigned_ID=" + id + ";";
 		pool.getConnection(function(err, connection){
-			connection.query(sql, function(err, rows){
+			connection.query(sql, function selectCb(err, rows, fields){
 				console.log("Affiliate deleted");
 			});
 			connection.release();
@@ -132,9 +323,9 @@ io.on("connection", function(socket){
 	socket.on("approve", function(id){
 		
 		console.log("approveing request sent");
-		sql = "UPDATE client_info SET approved = 1 WHERE Assigned_ID = " + id.ID + ";";
-		sql2 = "SELECT Email FROM client_info WHERE Assigned_ID = " + id.ID + ";";
-		sql3 = "CREATE TABLE affiliate" + id.ID + " (" +
+		var sql = "UPDATE client_info SET approved = 1 WHERE Assigned_ID = " + id.ID + ";";
+		var sql2 = "SELECT Email FROM client_info WHERE Assigned_ID = " + id.ID + ";";
+		var sql3 = "CREATE TABLE affiliate" + id.ID + " (" +
 			"Name VARCHAR(50) NOT NULL," +
 			"Offer_ID INT(10) NOT NULL," +
 			"Affiliate_ID INT(10) NOT NULL," +
@@ -142,8 +333,11 @@ io.on("connection", function(socket){
 			"Tracking_Link TEXT," + 
 			"Total_Payout INT(11) NOT NULL DEFAULT '0'," + 
 			"Payout_Limit INT(11) NOT NULL DEFAULT '0'," + 
+			"Total_Clicks INT(11) NOT NULL DEFAULT '0'," + 
 			"Clicks INT(10) NOT NULL DEFAULT '0'," +
+			"Total_Leads INT(11) NOT NULL DEFAULT '0'," + 
 			"Leads INT(10) NOT NULL DEFAULT '0'," + 
+			"Total_Sales INT(11) NOT NULL DEFAULT '0'," + 
 			"Sales INT(10) NOT NULL DEFAULT '0'," + 
 			"Payout_Clicks VARCHAR(10) NOT NULL DEFAULT '0'," + 
 			"Payout_Leads VARCHAR(10) NOT NULL DEFAULT '0'," + 
@@ -151,6 +345,17 @@ io.on("connection", function(socket){
 			"Clicks_Limit INT(10) NOT NULL DEFAULT '0'," + 
 			"Leads_Limit INT(10) NOT NULL DEFAULT '0'," + 
 			"Sales_Limit INT(10) NOT NULL DEFAULT '0'," + 
+			"Start_Date DATE NOT NULL," + 
+			"Last_Date DATE NOT NULL," + 
+			"Expire_Date DATE NOT NULL)" ;
+
+		var sql4 = "CREATE TABLE affiliate_archive" + id.ID + " (" +
+			"Offer_ID INT(10) NOT NULL," +
+			"Affiliate_ID INT(10) NOT NULL," +
+			"Advertiser_ID INT(10) NOT NULL," +
+			"Clicks INT(10) NOT NULL DEFAULT '0'," +
+			"Leads INT(10) NOT NULL DEFAULT '0'," + 
+			"Sales INT(10) NOT NULL DEFAULT '0'," + 
 			"Start_Date DATE NOT NULL," + 
 			"Expire_Date DATE NOT NULL)" ;
 
@@ -194,7 +399,11 @@ io.on("connection", function(socket){
 				}
 				
 			});
-			connection.query(sql3, function (err, rows){
+			connection.query(sql3, function(err, rows){
+				if (err) console.log(err.message);
+
+			});
+			connection.query(sql4, function(err, rows){
 				if (err) console.log(err.message);
 
 			});
@@ -823,9 +1032,9 @@ app.get("/getoffer", loggedin, function(req, res, err){
 				if(err) console.log(err.message);
 				connection.query(sql1, function(err, fields){
 					if(err) console.log(err.message);
-					var link = "http://192.168.0.22:3000/tracking?off_id=" + rows[0].Offer_ID + "&aff_id=" + rows[0].Affiliate_ID;
+					var link = "http://192.168.0.46:3000/tracking?off_id=" + rows[0].Offer_ID + "&aff_id=" + rows[0].Affiliate_ID;
 					var path = "./views/admin/uploads/banner-" + rows[0].Offer_ID + "-" + rows[0].Advertiser_ID;
-					var link2 = "http://192.168.0.22:3000/upload?camp_id="+ rows[0].Offer_ID + "&advertiser_id=" + rows[0].Advertiser_ID + "&name=";
+					var link2 = "http://192.168.0.46:3000/upload?camp_id="+ rows[0].Offer_ID + "&advertiser_id=" + rows[0].Advertiser_ID + "&name=";
 					var files = fs.readdirSync(path);
 					var len = files.length;
 					var imagelink = [];
@@ -849,8 +1058,9 @@ app.post('/Apply_Offers', function(req, res, err){
 	for (var prop in req.body){
 		proparray.push(prop);
 	}
-	var sql = "SELECT Offers_Num, Offers_Pending, Offers_Limit FROM client_info WHERE Assigned_ID = "+ req.user.Assigned_ID +";";
-	console.log(sql);
+	var sql = "SELECT * FROM client_info WHERE Assigned_ID = "+ req.user.Assigned_ID +";";
+
+
 	pool.getConnection(function(err, connection){
 		if (err) console.log(err.message);
 		connection.query(sql, function(err, rows, fields){
@@ -864,15 +1074,57 @@ app.post('/Apply_Offers', function(req, res, err){
 				for (var i = 0; i < proparray.length; i++){
 					offers = offers + proparray[i] + ',';
 				}
+				var sql1 = "INSERT INTO affiliate_pending_offers (" + 
+					"Offer_Name," +
+					"Offer_ID," +
+					"Aff_ID," +
+					"Aff_Name1," +
+					"Aff_Name2," +
+					"Company," +
+					"Site_URL1," +
+					"Site_Category1," +
+					"Unique_Visitors_PM, Phone) " + 
+					"VALUES ";
+				for (var i = 0; i < proparray.length - 1; i++){
+					sql1 = sql1 + '("' + req.body[proparray[i]] + '",' +
+					'"' + proparray[i] + '",' +
+					'"' + rows[0].Assigned_ID + '",' +
+					'"' + rows[0].First_Name + '",' +
+					'"' + rows[0].Last_Name + '",' +
+					'"' + rows[0].Company + '",' + 
+					'"' + rows[0].Site_URL1 + '",' + 
+					'"' + rows[0].Site_Category1 + '",' +
+					'"' + rows[0].Unique_Visitors_PM + '",' +
+					'"' + rows[0].Phone + 
+					'"),'
+				}
+				// last one has no comma
+				sql1 = sql1 + '("' + req.body[proparray[i]] + '",' +
+					'"' + proparray[i] + '",' +
+					'"' + rows[0].Assigned_ID + '",' +
+					'"' + rows[0].First_Name + '",' +
+					'"' + rows[0].Last_Name + '",' +
+					'"' + rows[0].Company + '",' + 
+					'"' + rows[0].Site_URL1 + '",' + 
+					'"' + rows[0].Site_Category1 + '",' +
+					'"' + rows[0].Unique_Visitors_PM + '",' +
+					'"' + rows[0].Phone + 
+					'")';
+
+
+				console.log(sql1);
+				connection.query(sql1, function(err, rows){
+					if (err) console.log(err.message);
+				});
 				var total_pending = proparray.length + rows[0].Offers_Pending;
-				sql1 = "UPDATE client_info SET Offers=(" +
+				sql2 = "UPDATE client_info SET Offers=(" +
 					"CASE WHEN Offers='null' " + 
 					"THEN '" + offers + "' " + 
         			" ELSE concat(Offers, '"+ offers + "')" + 
     				" END" + 
 					"), Offers_Pending=" + total_pending + " WHERE Assigned_ID=" + req.user.Assigned_ID + ";";
-				console.log(sql1);
-				connection.query(sql1, function(err, rows){
+				console.log(sql2);
+				connection.query(sql2, function(err, rows){
 					if (err) console.log(err.message);
 				});
 				var requestLeft = rows[0].Offers_Limit - rows[0].Offers_Num - proparray.length - rows[0].Offers_Pending;
@@ -922,6 +1174,14 @@ app.get('/admin/approve_ad', adminloggedin, function(req,res){
 
 app.get("/admin/affiliates", adminloggedin, function(req, res, err){
 	res.render('affiliateUserManagementList.ejs', { message: null });
+});
+
+app.get("/admin/approve_offers", adminloggedin, function(req, res, err){
+	res.sendFile('views/adminOffersApproval.html', { root:__dirname });
+});
+
+app.get("/admin/affiliate_pay", adminloggedin, function(req, res, err){
+	res.sendFile('views/affiliatePayouts.html', { root:__dirname });
 });
 
 app.get('/admin/users', adminloggedin, function(req,res){
@@ -1245,11 +1505,11 @@ app.get('/tracking', function(req, res, err){
 	var aff_id = req.query.aff_id;
 	var sql = "SELECT Url FROM campaigns WHERE Assigned_ID = " + off_id + ";";
 	var sql1 = "UPDATE affiliate" + aff_id + " SET Clicks = Clicks + 1 WHERE Offer_ID = " + off_id + ";";
-	pool.getConnection(function(err, connection)
-		connection.query(sql1, function (err, rows){
+	pool.getConnection(function(err, connection){
+		connection.query(sql1, function(err, rows){
 			if (err) console.log(err.message);
 		});
-		connection.query(sql, function (err, rows){
+		connection.query(sql, function(err, rows){
 			if (err) console.log(err.message);
 			res.cookie("track", "o:" + off_id + ":a:" + aff_id, {signed: true, maxAge: 180 * 24 * 60 * 60 * 1000});
 			var url = rows[0].Url;

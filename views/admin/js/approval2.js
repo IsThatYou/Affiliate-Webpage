@@ -1,5 +1,5 @@
 $(function() {
-  var socket = io("http://192.168.0.22:3000/");
+  var socket = io("http://192.168.0.46:3000/");
   socket.emit("application ad info");
   $("#app-content").append("There seems to be nothing left.");
 
