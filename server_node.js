@@ -9,11 +9,12 @@ var DATABASE = 'affiliate_web_database';
 var TABLE = 'requests_info';
 
 var pool = mysql.createPool({
-	connectionlimit:2,
+	connectionlimit:50,
 	host: HOST,
 	database: DATABASE,
 	user: MYSQL_USER,
 	password: MYSQL_PASS,
+	acquireTimeout: 30000
 });
 
 
@@ -43,9 +44,10 @@ app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/views'));
-app.get('/',function(req,res){
+/*app.get('/',function(req,res){
   res.render('Signup_Application2.ejs', { message: '' });
 });
+ */
 app.use(cookieParser('secret'));
 var upload = multer({ dest: './uploads/' });
 
@@ -58,7 +60,7 @@ var upload = multer({ dest: './uploads/' });
 var email = require('emailjs');
 io.on("connection", function(socket){
 	console.log("socket connected...");
-	//// Send client's info when requested.
+	//// Send affiliate's info when requested.
 	socket.on("application info", function(data){
 		var sql = '';
 		if (data.message == '1'){
@@ -70,6 +72,7 @@ io.on("connection", function(socket){
 			"Address1, City, State, Country, Zip, Phone, Assigned_ID FROM client_info " +
 			"WHERE approved = 1;";
 		}
+
 		pool.getConnection(function(err, connection) {
 	  	// Use the connection
 	  		connection.query(sql, function selectCb(err, results, fields) {
@@ -92,6 +95,59 @@ io.on("connection", function(socket){
 	 	 });
 	  	});
 	});
+	socket.on("campaign info", function(data){
+
+		sql = "SELECT * FROM campaigns WHERE approved=1;";
+		
+		pool.getConnection(function(err, connection) {
+	  	// Use the connection
+	  		if (err) throw err; 
+	  		connection.query(sql, function selectCb(err, results, fields) {
+	  		if (err){
+	  			console.log(err.message);
+	  		}
+	    // And done with the connection.
+	    	if (results && results.length > 0){
+
+		    	console.log("request_approval page updated");
+				socket.emit("campaign_info", {results:results});	
+	    	}
+	    	connection.release();
+	    // Don't use the connection here, it has been returned to the pool.
+	 	 });
+	  	});
+	});
+	socket.on("remove campaign", function(data){
+		var id = data.ID;
+		sql = "DELETE FROM campaigns WHERE Assigned_ID=" + id + ";";
+		
+		pool.getConnection(function(err, connection) {
+	  	// Use the connection
+	  		connection.query(sql, function selectCb(err, results, fields) {
+	  		if (err){
+	  			console.log(err.message);
+	  		}
+	  		console.log("Campaign removed: " + results);
+	    	connection.release();
+	    // Don't use the connection here, it has been returned to the pool.
+	 	 });
+	  	});
+	});
+	// ----------------------affiliatecampaigninformation.ejs---------------------------//
+	// ---------------------------edit the campsigns here ------------------------------//
+
+	socket.on("delete campaign", function(data){
+		off_id = data.message;
+		sql = "DELETE FROM campaigns WHERE Assigned_ID=" + off_id + ";";
+		pool.getConnection(function(err, connection){
+			if (err) throw err;
+			connection.query(sql, function(err, rows){
+				if (err) console.log(err);
+			})
+			connection.release();
+		})
+	});
+
 
 	// ----------------------the approval process for----------------------------//
 	// ----------------------campaigns/offers request ---------------------------//
@@ -219,15 +275,18 @@ io.on("connection", function(socket){
 
 	socket.on("payout info", function(data){
 		aff_id = data.ID;
-		aff_id = '96';
-		sql = "SELECT * FROM affiliate" + aff_id + ";";
+		sql = "SELECT * FROM affiliate_archive" + aff_id + " WHERE Paid=0;";
+		sql1 = "SELECT * FROM affiliate" + aff_id + ";";
 		console.log(sql);
 		pool.getConnection(function(err, connection){
 			if (err) console.log(err.message);
-			connection.query(sql, function(err, rows){
+			connection.query(sql1, function(err, fields){
 				if (err) console.log(err.message);
-				console.log(rows[0])
-				socket.emit("payout_info", {payout: rows});
+				connection.query(sql, function(err, rows){
+					if (err) console.log(err.message);
+					console.log(rows[0])
+					socket.emit("payout_info", {payout: rows, other: fields});
+				})
 			})
 			connection.release();
 		})
@@ -260,16 +319,9 @@ io.on("connection", function(socket){
 
 	socket.on("archive payouts", function(data){
 		for (var i in data.message){
-			sql = "INSERT INTO affiliate_archive" + data.message[i].Aff_ID + 
-			"Clicks=" + data.message[i].Clicks +
-			",Leads=" + data.message[i].lead +
-			",Sales=" + data.message[i].sales +
-			",Payout_Clicks=" + data.message[i].cpc +
-			",Payout_Leads=" + data.message[i].apc +
-			",Payout_Sales=" + data.message[i].spc +
-			" WHERE Offer_ID=" + data.message[i].Off_ID + ";";
- 
-
+			sql = "UPDATE affiliate_archive" + data.message[i].aff_id + " SET Paid=1 " +
+				"WHERE Offer_ID=" + data.message[i].off_id + ";";  
+			
 			console.log(sql);
 			pool.getConnection(function(err, connection){
 				if (err) console.log(err.message);
@@ -280,6 +332,27 @@ io.on("connection", function(socket){
 				connection.release();
 			})
 		}
+	});
+
+	socket.on("overview between dates", function(data){
+		
+		sql = "SELECT * FROM affiliate_archive" + data.aff_id + 
+			" WHERE DATE(Time)>='" + data.begin + "' AND DATE(Time)<='" + data.end + "';";  
+		sql1 = "SELECT * FROM affiliate" + data.aff_id + ";";
+		console.log(sql);
+		pool.getConnection(function(err, connection){
+			if (err) console.log(err.message);
+			connection.query(sql1, function(err, fields){
+				if (err) console.log(err.message);
+				connection.query(sql, function(err, rows){
+					if (err) console.log(err.message);
+					socket.emit("overview_between_dates", {message: rows, other: fields});
+
+				});
+			});
+			connection.release();
+		});
+		
 	});
 	// --------the approval process for advertisers & affiliates sign ups -----------//
 	//
@@ -351,13 +424,11 @@ io.on("connection", function(socket){
 
 		var sql4 = "CREATE TABLE affiliate_archive" + id.ID + " (" +
 			"Offer_ID INT(10) NOT NULL," +
-			"Affiliate_ID INT(10) NOT NULL," +
 			"Advertiser_ID INT(10) NOT NULL," +
-			"Clicks INT(10) NOT NULL DEFAULT '0'," +
-			"Leads INT(10) NOT NULL DEFAULT '0'," + 
-			"Sales INT(10) NOT NULL DEFAULT '0'," + 
-			"Start_Date DATE NOT NULL," + 
-			"Expire_Date DATE NOT NULL)" ;
+			"IP VARCHAR(20) NOT NULL," +
+			"Types CHAR NOT NULL," +
+			"Paid INT(1) NOT NULL DEFAULT '0'," +
+			"Time DATE NOT NULL) ENGINE=ARCHIVE" ;
 
 		pool.getConnection(function(err, connection){
 			connection.query(sql, function selectCb(err, results, fields) {
@@ -391,7 +462,7 @@ io.on("connection", function(socket){
 					   text:    "approved", 
 					   from:    from,
 					   //to
-					   to:      "me <jwang@cminyc.com>",
+					   to:      "me <jwang@cminyc.com>, Ian <production@mckenziepictures.com>",
 					   cc:      "",
 					   subject: "testing emailjs"
 					}, function(err, message) { console.log(err || message); });
@@ -438,7 +509,7 @@ io.on("connection", function(socket){
 					var to = results[0].Email;
 					var from = 'Affiliate_test@cminyc.com';
 					var emailserver = email.server.connect({
-					   user:    "Affiliate_test@cminyc.com", 
+					   user:    "Affiliate_test@cminyc.com, Ian <production@mckenziepictures.com>", 
 					   password:"affiliate2015%", 
 					   // the host needs to be setup SMTP
 					   host:    "smtp.cminyc.com", 
@@ -493,7 +564,7 @@ io.on("connection", function(socket){
 					emailserver.send({
 					   text:    "denied", 
 					   from:    from, 
-					   to:      "me <jwang@cminyc.com>",
+					   to:      "me <jwang@cminyc.com>, Ian <production@mckenziepictures.com>",
 					   cc:      "",
 					   subject: "testing emailjs"
 					}, function(err, message) { console.log(err || message); });
@@ -539,7 +610,7 @@ io.on("connection", function(socket){
 					emailserver.send({
 					   text:    "denied advertiser", 
 					   from:    from, 
-					   to:      "me <jwang@cminyc.com>",
+					   to:      "me <jwang@cminyc.com>, Ian <production@mckenziepictures.com>",
 					   cc:      "",
 					   subject: "testing emailjs"
 					}, function(err, message) { console.log(err || message); });
@@ -599,21 +670,23 @@ passport.deserializeUser(function(id, done) {
 	console.log('test: ' + id.Identity);
 	console.log(!id.Identity);
 	if (id.Identity == 'ad'){
+		console.log("guacomoli" + id.num);
 		pool.getConnection(function(err, connection){
 	    	connection.query("SELECT * FROM advertiser_info WHERE Assigned_ID = ? ",[id.num], function(err, rows){
-	        done(err, rows[0]);
-	        connection.release();
+		        console.log("guacomoli" + rows[0]);
+		        done(err, rows[0]);
+		        connection.release();
 	    	});
     	});
 	} 
-	if (id.Identity == 'admin'){
+	else if (id.Identity == 'admin'){
 		done(null, id);
 	}
-	else{
+	else {
 		pool.getConnection(function(err, connection){
     		connection.query("SELECT * FROM client_info WHERE Assigned_ID = ? ",[id.num], function(err, rows){
-	        done(err, rows[0]);
-	        connection.release();
+		        done(err, rows[0]);
+		        connection.release();
     		});
     	});
 	}
@@ -625,10 +698,36 @@ app.use(flash());
 
 
 
+
 //// Affiliate Login
 app.set('view engine', 'ejs');
 app.get('/login', function(req, res, err){
 	res.render('affiliateLogin.ejs', { message: req.flash('loginMessage') });
+});
+
+// ABOUT Main Page
+app.get('/about', function(req, res, err){
+	res.render('MainPageAbout.ejs', {message: req.user});
+});
+// CONTACT Main Page
+app.get('/contact', function(req, res, err){
+	res.render('MainPageContact.ejs', {message: req.user});
+});
+// ADVERTISER Main Page
+app.get('/advertiser', function(req, res, err){
+	res.render('MainPageAdvertiser.ejs', {message: req.user});
+});
+// AFFILIATE Main Page
+app.get('/affiliate', function(req, res, err){
+	res.render('MainPageAffiliate.ejs', {message: req.user});
+});
+// MAIN PAGE
+app.get('/', function(req, res, err){
+	res.render('MainPage.ejs', {message: req.user});
+});
+// THANK YOU PAGE
+app.get('/thankyou', function(req, res, err){
+	res.render('thankYou.ejs');
 });
 
 passport.use(
@@ -713,6 +812,8 @@ app.post('/login_ad', passport.authenticate('local-login-ad', {
 	failureRedirect: '/login_ad',
 	failureFlash: true
 }));
+
+
 
 
 
@@ -852,7 +953,7 @@ passport.use(
 		})); 
    
 app.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/login', // redirect to the secure profile section
+		successRedirect : '/thankyou', // redirect to the secure profile section
 		failureRedirect : '/signup', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 }));
@@ -982,7 +1083,7 @@ function loggedin(req, res, next){
 // offers
 
 app.get("/offers", loggedin, function(req, res, err){
-	if (req.session.passport.Identity != 'ad'){
+	if (req.session.passport.user.Identity != 'ad'){
 
 		var sql = "SELECT * FROM campaigns WHERE approved = 1;";
 		pool.getConnection(function(err, connection){
@@ -997,7 +1098,7 @@ app.get("/offers", loggedin, function(req, res, err){
 });
 
 app.get("/myoffers", loggedin, function(req, res, err){
-	if (req.session.passport.Identity != 'ad'){
+	if (req.session.passport.user.Identity != 'ad'){
 		console.log(req.session.passport.user.num);
 		var sql = "SELECT * FROM affiliate" + req.session.passport.user.num + ";";
 		console.log(sql);
@@ -1022,8 +1123,8 @@ app.get("/myoffers", loggedin, function(req, res, err){
 });
 
 app.get("/getoffer", loggedin, function(req, res, err){
-	if (req.session.passport.Identity != 'ad'){
-		console.log(req.session.passport.user.num);
+	if (req.session.passport.user.Identity != 'ad'){
+
 		var off_id = req.query.off_id;
 		var sql = "SELECT * FROM affiliate" + req.session.passport.user.num + " WHERE Offer_ID = " + off_id + ";";
 		var sql1 = "SELECT Long_D, Affiliate_Per_Affiliate, Start_Date, End_Date FROM campaigns WHERE Assigned_ID = " + off_id + ";"; 
@@ -1032,9 +1133,9 @@ app.get("/getoffer", loggedin, function(req, res, err){
 				if(err) console.log(err.message);
 				connection.query(sql1, function(err, fields){
 					if(err) console.log(err.message);
-					var link = "http://192.168.0.46:3000/tracking?off_id=" + rows[0].Offer_ID + "&aff_id=" + rows[0].Affiliate_ID;
+					var link = "http://127.0.0.1/tracking?off_id=" + rows[0].Offer_ID + "&aff_id=" + rows[0].Affiliate_ID;
 					var path = "./views/admin/uploads/banner-" + rows[0].Offer_ID + "-" + rows[0].Advertiser_ID;
-					var link2 = "http://192.168.0.46:3000/upload?camp_id="+ rows[0].Offer_ID + "&advertiser_id=" + rows[0].Advertiser_ID + "&name=";
+					var link2 = "http://127.0.0.1:3000/upload?camp_id="+ rows[0].Offer_ID + "&advertiser_id=" + rows[0].Advertiser_ID + "&name=";
 					var files = fs.readdirSync(path);
 					var len = files.length;
 					var imagelink = [];
@@ -1140,6 +1241,219 @@ app.post('/Apply_Offers', function(req, res, err){
 			connection.release();
 		});
 	});
+}); 
+
+
+
+//----------------------------------------------------------------------------------------------//
+//--------------------------------------------Advertiser---------------------------------------------//
+function loggedin_ad(req, res, next){
+	if (req.user){
+		
+		next();
+	}
+	else{
+		res.redirect('/login_ad');
+	}
+}
+
+app.get("/Create_Campaign", loggedin_ad, function(req, res, err){
+
+	console.log(req.session.passport.user.Identity =='ad');
+	if (req.session.passport.user.Identity == 'ad'){
+
+		res.render('affiliateCreateCampaign.ejs', { message: null });
+	} else {
+		res.redirect('/login_ad');
+	}
+});
+
+
+app.post('/Create_Campaign', upload.array('fileUploaded', 12), function (req, res, next) {
+	// body
+	var proparray = [];
+	for (var prop in req.body){
+		proparray.push(prop);
+	}
+	console.log(proparray.length + 2);
+	for (var i = 0; i < proparray.length; i++){
+		if (req.body[proparray[i]] == '' || req.body[proparray[i]] == 'http://' || req.body[proparray[i] == undefined]){
+			req.body[proparray[i]] = null;
+		}	
+	}
+	// special case for no.47 entry
+	var country = req.body[proparray[47]];
+	if (req.body[proparray[47]] != null && req.body[proparray[47]][0] == ','){
+		country = req.body[proparray[47]].substring(1, req.body[proparray[47]][0].length);
+		country = country[1];
+	}
+	var parallel_universe = false;
+	if (req.body['tracking_pixel'] == null){
+		parallel_universe =  false;
+	} else {
+		parallel_universe = true;
+	}
+	console.log("parallel universe? " + parallel_universe);
+	var info = "INSERT INTO campaigns" + 
+						"(Cost_Per_Lead," +
+						"Cost_Per_Click," +
+						"Cost_Per_TI," +
+						"Cost_Per_Sale," + 
+						"Monthly_Recurring_Payment," + 
+						"Product_Specific," +
+						"Pop_up," + 
+						"Pop_UnderUp_Value," + 
+						"SCP," + 
+						"Name," + 
+						"Advertiser_ID," + 
+						"Url," + 
+						"Long_D," +
+						"Short_D," +
+						"Start_Date," + 
+						"End_Date," + 
+						"Offered_Clicks," + 
+						"Offered_Leads," + 
+						"Offered_Sales," + 
+						"Offered_Impressions," + 
+						"Offered_CoRegi," + 
+						"Affiliate_Per_Affiliate," + 
+						"Affiliate_Per_Click," + 
+						"Affiliate_Lead_PC," + 
+						"Affiliate_Impression_PC," + 
+						"Affiliate_Per_Sale," + 
+						"Affiliate_Per_Sub_Sale," + 
+						"Affiliate_Flat_Per_Sale," + 
+						"Affiliate_Flat_Per_Sub_Sale," + 
+						"run," + 
+						"sel1," +
+						"sel2," + 
+						"sel3," +
+						"Ndate," +
+						"NClicks," +
+						"NLeads," +
+						"NSales," +
+						"NImpression," + 
+						"Notif_Date," + 
+						"Clicks_Level," + 
+						"Leads_Level," + 
+						"Sales_Level," + 
+						"Impression_Level," + 
+						"Threshold_Email," + 
+						"Type_Tracking," +
+						"Tracking_Pixel," +
+						"Country," +
+						"Specific_Country," +
+						"Note)" +
+						" VALUES " +
+						"(" + 
+						'"' + req.body[proparray[0]] + '",' +
+						'"' + req.body[proparray[1]] + '",' +
+						'"' + req.body[proparray[2]] + '",' +
+						'"' + req.body[proparray[3]] + '",' +
+						'"' + req.body[proparray[4]] + '",' +
+						'"' + req.body[proparray[5]] + '",' + 
+						'"' + req.body[proparray[6]] + '",' +
+						'"' + req.body[proparray[7]] + '",' +
+						'"' + req.body[proparray[8]] + '",' + 
+						'"' + req.body[proparray[9]] + '",' + 
+						'"' + req.body[proparray[10]] + '",' +
+						'"' + req.body[proparray[11]] + '",' + 
+						'"' + req.body[proparray[12]] + '",' + 
+						'"' + req.body[proparray[13]] + '",' +
+						'"' + req.body[proparray[14]] + '",' + 
+						'"' + req.body[proparray[15]] + '",' +
+						'"' + req.body[proparray[16]] + '",' + 
+						'"' + req.body[proparray[17]] + '",' + 
+						'"' + req.body[proparray[18]] + '",' + 
+						'"' + req.body[proparray[19]] + '",' + 
+						'"' + req.body[proparray[20]] + '",' +
+						'"' + req.body[proparray[21]] + '",' +
+						'"' + req.body[proparray[22]] + '",' +
+						'"' + req.body[proparray[23]] + '",' +
+						'"' + req.body[proparray[24]] + '",' +
+						'"' + req.body[proparray[25]] + '",' +
+						'"' + req.body[proparray[26]] + '",' +
+						'"' + req.body[proparray[27]] + '",' + 
+						'"' + req.body[proparray[28]] + '",' + 
+						'"' + req.body[proparray[29]] + '",' + 
+						'"' + req.body[proparray[30]] + '",' +
+						'"' + req.body[proparray[31]] + '",' +
+						'"' + req.body[proparray[32]] + '",' + 
+						'"' + req.body[proparray[33]] + '",' + 
+						'"' + req.body[proparray[34]] + '",' +
+						'"' + req.body[proparray[35]] + '",' +
+						'"' + req.body[proparray[36]] + '",' + 
+						'"' + req.body[proparray[37]] + '",' +
+						'"' + req.body[proparray[38]] + '",' +
+						'"' + req.body[proparray[39]] + '",' + 
+						'"' + req.body[proparray[40]] + '",' +
+						'"' + req.body[proparray[41]] + '",' +
+						'"' + req.body[proparray[42]] + '",' +
+						'"' + req.body[proparray[43]] + '",' +
+						'"' + req.body[proparray[44]] + '",' +
+						'"' + req.body[proparray[45]] + '",' +
+						'"' + req.body[proparray[46]] + '",' +
+						'"' + country + '",' +
+						'"' + req.body[proparray[48]] + 
+						'");';
+	console.log(info);
+	var camp_id = 2;
+	var advertiser_id = 2;
+	var path = '';
+	pool.getConnection(function(err, connection){
+		console.log('1');
+		connection.query(info, function(error, fields) {
+			
+		    console.log('did it:'  + fields.insertId);
+
+		    // get the advertiser_id of the row just inserted
+		    	if (parallel_universe == false){
+		    		var tracking_pixel = 
+			    	sql2 = 'UPDATE campaigns SET Tracking_Pixel="' + "<script type='text/javascript'> var ClickMeter_pixel_url = '//127.0.0.1:3000/pixel.gif?off_id=" + fields.insertId +"aff_id=" + req.body['add_id'] +"'; </script> <script type='text/javascript' id='cmpixelscript' src='//s3.amazonaws.com/scripts-clickmeter-com/js/pixelNew.js'></script> <noscript> <img height='0' width='0' alt='' src='http://127.0.0.1:3000/pixel.gif' /> </noscript>" +
+			    	'" WHERE Assigned_ID = ' + fields.insertId + ";";
+			    	console.log(sql2);
+			    	connection.query(sql2, function(err, rows){
+			    		if (err) console.log(err.message);
+			    	});
+		    	}
+		    	camp_id = fields.insertId;
+		    	advertiser_id = fields.insertId;
+		    	// create a folder with camp_id and advertiser_id to store banners.
+		    	path = "./views/admin/uploads/banner-" + camp_id + "-" + advertiser_id;
+
+				var mkdirSync = function (path) {
+					  try {
+					    fs.mkdirSync(path);
+					  } catch(e) {
+					    if ( e.code != 'EEXIST' ) throw e;
+					  }
+					}
+	
+				mkdirSync(path);
+				// store the images 
+				for (var i in req.files){
+
+					var tmp_path = req.files[i].path;
+					var target_path = path + "/" + req.files[i].originalname;
+					
+					var src = fs.createReadStream(tmp_path);
+					var dest = fs.createWriteStream(target_path);
+					src.pipe(dest);
+
+					fs.unlink(tmp_path, function (err) {
+					  if (err) throw err;
+					  console.log('successfully deleted ' + tmp_path);
+					});
+					src.on('error', function(err) { res.render('affiliateCreateCampaign.ejs', { message: null }); });
+					}
+		    	
+						    
+		    connection.release();
+		    
+		    // Don't use the connection here, it has been returned to the pool.
+	  	});
+	});
+
 });
 
 
@@ -1147,6 +1461,8 @@ app.post('/Apply_Offers', function(req, res, err){
 
 //----------------------------------------------------------------------------------------------//
 //--------------------------------------------Admin---------------------------------------------//
+
+
 app.get("/admin", function(req, res, err){
 	res.render('adminLogin.ejs', { message: req.flash('login_admin_Message') });
 });
@@ -1202,6 +1518,131 @@ app.get('/admin/users', adminloggedin, function(req,res){
 		res.render('affiliateUserInformation.ejs', { message: null });
 	}
 	
+});
+
+// affiliate
+app.post('/admin/Update_Campaign', upload.array('fileUploaded', 12), function (req, res, next) {
+	// body
+	var proparray = [];
+	for (var prop in req.body){
+		proparray.push(prop);
+	}
+	console.log(proparray.length + 2);
+	for (var i = 0; i < proparray.length; i++){
+		if (req.body[proparray[i]] == '' || req.body[proparray[i]] == 'http://' || req.body[proparray[i] == undefined]){
+			req.body[proparray[i]] = null;
+		}	
+	}
+	// special case for no.47 entry
+	var country = req.body[proparray[47]];
+	if (req.body[proparray[47]] != null && req.body[proparray[47]][0] == ','){
+		country = req.body[proparray[47]].substring(1, req.body[proparray[47]][0].length);
+		country = country[1];
+	}
+
+	var info = "UPDATE campaigns SET " +
+						"Cost_Per_Lead = '" + req.body[proparray[0]] +                   
+						"',Cost_Per_Click = '" + req.body[proparray[1]] +
+						"',Cost_Per_TI = '" + req.body[proparray[2]] +
+						"',Cost_Per_Sale = '" + req.body[proparray[3]] + 
+						"',Monthly_Recurring_Payment = '" + req.body[proparray[4]] + 
+						"',Product_Specific = '" + req.body[proparray[5]] +
+						"',Pop_up = '" + req.body[proparray[6]] + 
+						"',Pop_UnderUp_Value = '" + req.body[proparray[7]] + 
+						"',SCP = '" + req.body[proparray[8]] + 
+						"',Name = '" + req.body[proparray[9]] + 
+						"',Advertiser_ID = '" + req.body[proparray[10]] + 
+						"',Url = '" + req.body[proparray[11]] + 
+						"',Long_D = '" + req.body[proparray[12]] +
+						"',Short_D = '" + req.body[proparray[13]] +
+						"',Start_Date = '" + req.body[proparray[14]] + 
+						"',End_Date = '" + req.body[proparray[15]] + 
+						"',Offered_Clicks = '" + req.body[proparray[16]] + 
+						"',Offered_Leads = '" + req.body[proparray[17]] + 
+						"',Offered_Sales = '" + req.body[proparray[18]] + 
+						"',Offered_Impressions = '" + req.body[proparray[19]] + 
+						"',Offered_CoRegi = '" + req.body[proparray[20]] + 
+						"',Affiliate_Per_Affiliate = '" + req.body[proparray[21]] + 
+						"',Affiliate_Per_Click = '" + req.body[proparray[22]] + 
+						"',Affiliate_Lead_PC = '" + req.body[proparray[23]] + 
+						"',Affiliate_Impression_PC = '" + req.body[proparray[24]] + 
+						"',Affiliate_Per_Sale = '" + req.body[proparray[25]] + 
+						"',Affiliate_Per_Sub_Sale = '" + req.body[proparray[26]] + 
+						"',Affiliate_Flat_Per_Sale = '" + req.body[proparray[27]] + 
+						"',Affiliate_Flat_Per_Sub_Sale = '" + req.body[proparray[28]] + 
+						"',run = '" + req.body[proparray[29]] + 
+						"',sel1 = '" + req.body[proparray[30]] +
+						"',sel2 = '" + req.body[proparray[31]] + 
+						"',sel3 = '" + req.body[proparray[32]] +
+						"',Ndate = '" + req.body[proparray[33]] +
+						"',NClicks = '" + req.body[proparray[34]] +
+						"',NLeads = '" + req.body[proparray[35]] +
+						"',NSales = '" + req.body[proparray[36]] +
+						"',NImpression = '" + req.body[proparray[37]] + 
+						"',Notif_Date = '" + req.body[proparray[38]] + 
+						"',Clicks_Level = '" + req.body[proparray[39]] + 
+						"',Leads_Level = '" + req.body[proparray[40]] + 
+						"',Sales_Level = '" + req.body[proparray[41]] + 
+						"',Impression_Level = '" + req.body[proparray[42]] + 
+						"',Threshold_Email = '" + req.body[proparray[43]] + 
+						"',Type_Tracking = '" + req.body[proparray[44]] +
+						"',Tracking_Pixel = " + '"' + req.body[proparray[45]] + '"' +
+						",Country = '" + req.body[proparray[46]] +
+						"',Specific_Country = '" + country +
+						"',Note = '" + req.body[proparray[48]] + 
+						"' WHERE Assigned_ID=" + req.body[proparray[49]] + ";";
+
+	console.log(info);
+	var camp_id = 2;
+	var advertiser_id = 2;
+	var path = '';
+	pool.getConnection(function(err, connection){
+		if (err) throw err;
+		connection.query(info, function(error, fields) {
+				if (err) console.log(err);
+
+				console.log(fields);
+
+		    	camp_id = req.body[proparray[49]];
+		    	advertiser_id = req.body['add_id'];
+		    	// create a folder with camp_id and advertiser_id to store banners.
+		    	path = "./views/admin/uploads/banner-" + camp_id + "-" + advertiser_id;
+
+				var mkdirSync = function (path) {
+					  try {
+					    fs.mkdirSync(path);
+					  } catch(e) {
+					    if ( e.code != 'EEXIST' ) throw e;
+					  }
+					}
+	
+				mkdirSync(path);
+				// store the images 
+				console.log("lol is awful" + path);
+				for (var i in req.files){
+					
+					var tmp_path = req.files[i].path;
+					var target_path = path + "/" + req.files[i].originalname;
+					console.log("lol is awful" + req.files[i]);
+					var src = fs.createReadStream(tmp_path);
+					var dest = fs.createWriteStream(target_path);
+					src.pipe(dest);
+
+					fs.unlink(tmp_path, function (err) {
+					  if (err) throw err;
+					  console.log('successfully deleted ' + tmp_path);
+					});
+					src.on('error', function(err) { res.render('affiliateCampaignInformation.ejs', { message: null }); });
+					}
+		    	
+						    
+		    connection.release();
+		    
+		    // Don't use the connection here, it has been returned to the pool.
+	  	});
+	});
+	res.redirect('/admin/all_campaigns');
+
 });
 
 app.post('/admin/users', adminloggedin, function(req, res){
@@ -1292,7 +1733,32 @@ passport.use(
 );
 
 app.get("/admin/Create_Campaign", adminloggedin, function(req, res, err){
-	res.render('affiliateCreateCampaign.ejs', { message: null });
+	res.render('adminCreateCampaign.ejs', { message: null });
+});
+
+app.get("/admin/all_campaigns", adminloggedin, function(req, res, err){
+	res.render('affiliateCampaignManagementList.ejs', { message: null });
+});
+
+app.get("/admin/campaigns", adminloggedin, function(req, res, err){
+	var camp_id= req.query.off_id;
+	sql = "SELECT * FROM campaigns WHERE Assigned_ID=" + camp_id + ";";
+	console.log(sql);
+	if (camp_id){
+		pool.getConnection(function(err, connection){
+			if (err) throw err; 
+			connection.query(sql, function(err, rows){
+				if (err) console.log(err);
+				//rows[0].Tracking_Pixel = rows[0].Tracking_Pixel.replace(/'/g, " &quot ");
+				//rows[0].Tracking_Pixel = rows[0].Tracking_Pixel;
+				console.log(rows[0]);
+				console.log(rows[0].Tracking_Pixel);
+				res.render('affiliateCampaignInformation.ejs', { message: rows[0] });
+			})
+		});
+	} else {
+		res.redirect("/all_campaigns");
+	}
 });
 
 
@@ -1504,7 +1970,18 @@ app.get('/tracking', function(req, res, err){
 	var off_id = req.query.off_id;
 	var aff_id = req.query.aff_id;
 	var sql = "SELECT Url FROM campaigns WHERE Assigned_ID = " + off_id + ";";
-	var sql1 = "UPDATE affiliate" + aff_id + " SET Clicks = Clicks + 1 WHERE Offer_ID = " + off_id + ";";
+	var sql1 = "UPDATE affiliate" + aff_id + " SET Total_Clicks = Total_Clicks + 1 WHERE Offer_ID = " + off_id + ";";
+	var sql3 = "UPDATE campaigns SET Total_Clicks = Total_Clicks + 1 WHERE Assigned_ID = " + off_id + ";";
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	var today = new Date();
+	time = today.getFullYear() + "-" + parseInt(today.getMonth() + 1)  + "-" + today.getDate();
+	var sql2 = "INSERT INTO affiliate_archive" + aff_id + " (Offer_ID, IP, Types, Time) Value(" +
+			"'" + off_id + "'," +
+			"'" + ip + "'," +
+			"'Clicks'," +
+			"'" + time + "');";
+	console.log(sql2);
+
 	pool.getConnection(function(err, connection){
 		connection.query(sql1, function(err, rows){
 			if (err) console.log(err.message);
@@ -1522,6 +1999,12 @@ app.get('/tracking', function(req, res, err){
 				console.log(url.substring(0,7));
 			}
 			
+		});
+		connection.query(sql2, function(err, rows){
+			if (err) console.log(err.message);
+		});
+		connection.query(sql3, function(err, rows){
+			if (err) console.log(err.message);
 		});
 		connection.release();
 	})
@@ -1577,7 +2060,7 @@ app.get('/pixel.gif', function(req, res, err){
 	// make sure one ip address only counts once
 	var add_id = req.query.add_id;
 	var off_id0 = req.query.off_id;
-
+	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
 	//var sql2 = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE Table_Name = 'campaigns' AND COLUMN_NAME LIKE 'af%';"
 	var cookie = req.signedCookies['track'];
@@ -1587,24 +2070,38 @@ app.get('/pixel.gif', function(req, res, err){
 	if (cookie){
 		off_id = cookie.split(':')[1];
 		aff_id = cookie.split(':')[3];
-		console.log("in: " + off_id, off_id0);
+		console.log("in: " + off_id);
+		console.log("in2: " + off_id0);
 		if (off_id == off_id0){
 
 			if (countip){
 
-				var sql = "UPDATE affiliate" + aff_id + " SET Leads = Leads + 1 WHERE Offer_ID = " + off_id + ";";
-				var sql_s = "UPDATE affiliate" + aff_id + " SET Sales = Sales + 1 WHERE Offer_ID = " + off_id + ";";
+				var sql = "UPDATE affiliate" + aff_id + " SET Total_Leads = Total_Leads + 1 WHERE Offer_ID = " + off_id + ";";
+				var sql_s = "UPDATE affiliate" + aff_id + " SET Total_Sales = Total_Sales + 1 WHERE Offer_ID = " + off_id + ";";
 				
-				var sql1 = "UPDATE campaigns SET Total_Lead = Total_Leads + 1 WHERE Assigned_ID = " + off_id + ";";
+				var sql1 = "UPDATE campaigns SET Total_Leads = Total_Leads + 1 WHERE Assigned_ID = " + off_id + ";";
 				var sql2 = "UPDATE campaigns SET Total_Sales = Total_Sales + 1 WHERE Assigned_ID = " + off_id + ";";
 				
 				var sql3 = "SELECT Cost_Per_Lead, Cost_Per_Sale, Total_Leads, Total_Sales, Offered_Leads, Offered_Sales FROM campaigns WHERE Assigned_ID = " + off_id + ";";
+				
 				console.log(sql);
 				pool.getConnection(function(err, connection){
 					connection.query(sql3, function selectCb(err, rows, fields){
+						var today = new Date();
+						time = today.getFullYear() + "-" + parseInt(today.getMonth() + 1) + "-" + today.getDate();
 						if (err) console.log(err.message);
 						// if clicks per lead
 						if (rows[0].Cost_Per_Lead != 'null'){
+							// add this to archive
+							var sql4 = "INSERT INTO affiliate_archive" + aff_id + " (Offer_ID, IP, Types, Time) Value(" +
+								"'" + off_id + "'," +
+								"'" + ip + "'," +
+								"'Leads'," +
+								"'" + time + "');";
+							console.log(sql4);
+							connection.query(sql4, function(err, rows){
+								if (err) console.log(err.message);
+							});
 							connection.query(sql1, function(err, rows){
 								if (err) console.log(err.message);
 								console.log("Style: Cost Per Lead");
@@ -1614,8 +2111,19 @@ app.get('/pixel.gif', function(req, res, err){
 								});								
 							});
 						}
-						// if clicks per action
+						// if clicks per sale
 						if (rows[0].Cost_Per_Sale != 'null'){
+							// add this to archive
+							var sql5 = "INSERT INTO affiliate_archive" + aff_id + " (Offer_ID, IP, Types, Time) Value(" +
+								"'" + off_id + "'," +
+								"'" + ip + "'," +
+								"'Sales'," +
+								"'" + time + "');";
+							console.log(sql5);
+							connection.query(sql5, function(err, rows){
+								if (err) console.log(err.message);
+							});
+
 							connection.query(sql2, function(err, rows){
 								if (err) console.log(err.message);
 								console.log("Style: Cost Per Sale");
@@ -1631,12 +2139,19 @@ app.get('/pixel.gif', function(req, res, err){
 						connection.release();
 					});
 				});
-			}
+			} 
 		}
+	} else {
+		res.sendStatus(200);
 	}
 
 });
 
+
+app.get('/logout', function(req, res) {
+		req.logout();
+		res.redirect('/');
+	});
 
 // Data Structure For Unique IP Count.
 function AccessLogger(blockTime) {
@@ -1700,6 +2215,7 @@ AccessLogger.prototype = {
 
 //block for 6 hours 
 var accesses = new AccessLogger(6 * 60 * 60 * 1000);
+
 
 http.listen(3000, function(){
   console.log("Started on PORT 3000");

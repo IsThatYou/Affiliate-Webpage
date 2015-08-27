@@ -13,37 +13,47 @@
     <body>
         <!-- Wrap all page content here -->
         <div id="wrap">
-            <!-- Fixed navbar -->
-            <div class="navbar navbar-default navbar-fixed-top">
-                <div class="container">
-                    <div class="navbar-header">
-                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        </button>
-                        <a class="navbar-brand" href="menuAfterLogin.html">MEDIA Company</a>
-                    </div>
-                    <div class="collapse navbar-collapse">
-                        <ul class="nav navbar-nav">
-                            <li><a href="menuAfterLogin.html">Home</a></li>
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Campaigns<b class="caret"></b></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="affiliateCampaignListing.html">All Campaigns</a></li>
-                                    <li><a href="affiliateCreateCampaign.html">Create Campaign</a></li>
-                                    <li><a href="affiliateAddCreative.html">Add Creative</a></li>
-                                    <li><a href="affiliateAdministrationDetails.html">Details</a></li>
-                                </ul>
-                            </li>
-                            <li class="active"><a href="affiliateReports.html">Reports</a></li>
-                            <li><a href="affiliateUserManagementList.html">Users</a></li>
-                            <li><a href="affiliateFraud.html">Fraud</a></li>
-                            <li><a href="affiliateAbout.html">About</a></li>
-                        </ul>
-                        </div><!--/.nav-collapse -->
-                    </div>
-                </div>
+        <!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">MEDIA Company</a>
+          </div>
+          <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+              <li><a href="/admin/reports">Home (X)</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Campaigns<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/admin/all_campaigns">All Campaigns</a></li>
+                  <li><a href="/admin/Create_Campaign">Create Campaign</a></li>
+                  <li><a href="/admin/details">Details (X)</a></li>
+                  <li><a href="/admin/approve_offers">Approve Offers</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Users<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/admin/affiliates">All Users</a></li>
+                  <li><a href="/admin/approve">Approve Users</a></li>
+                </ul>
+              </li>
+              <li><a href="/admin/approve_ad">Approve Advertisers</a></li>
+              <li><a href="/admin/reports">Reports (X)</a></li>
+              <li><a href="/admin/fraud">Fraud (X)</a></li>
+              <li><a href="/admin/about">About (X)</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span>Logout (X)</a></li>
+            </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </div>
                 
                 <!-- Begin page content -->
                 <div class="container">
@@ -120,7 +130,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div style="float:right" id="updateBtn">
-                                        <a class='btn btn-info btn-sm btn-block' style='width:100%;' role='button' id='updateValuesButton'>Update Values</a>
+                                        <!--
+                                        <a class='btn btn-info btn-sm btn-block' style='width:100%;' role='button' id='updateValuesButton'>Update Values</a>-->
                                     </div>
                                     <div style="float:right;padding-right:10px"><a class="btn btn-danger btn-sm btn-block" href="#" style="width:100%;" role="button" id="archive">Archive</a>
                                 </div>
@@ -155,7 +166,7 @@
             // When the document is ready
             $(document).ready(function () {
             $('.datepicker').datepicker({
-            format: "mm/dd/yyyy"
+            format: "yyyy-mm-dd"
             });
             });
             </script>

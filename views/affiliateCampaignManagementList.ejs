@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>MEDIA Company - Campaign Description</title>
+    <title>Affiliate Details</title>
     <link href="css/styles.css" rel="stylesheet" type="text/css">
     <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
@@ -13,8 +13,8 @@
     <!-- Wrap all page content here -->
     <div id="wrap">
       
-      <!-- Fixed navbar -->
-      <div class="navbar navbar-inverse navbar-fixed-top">
+  <!-- Fixed navbar -->
+      <div class="navbar navbar-default navbar-fixed-top">
         <div class="container">
           <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -26,18 +26,27 @@
           </div>
           <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-              <li><a href="/reports">Home</a></li>
-              <li class="dropdown active">
+              <li><a href="/admin/reports">Home (X)</a></li>
+              <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Campaigns<b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="/offers">All Campaigns</a></li>
-
-                  <li><a href="/myoffers">My Offers</a></li>
+                  <li><a href="/admin/all_campaigns">All Campaigns</a></li>
+                  <li><a href="/admin/Create_Campaign">Create Campaign</a></li>
+                  <li><a href="/admin/details">Details (X)</a></li>
+                  <li><a href="/admin/approve_offers">Approve Offers</a></li>
                 </ul>
               </li>
-            
-              <li><a href="/reports">Reports (X)</a></li>
-              <li><a href="/about">About (X)</a></li>
+              <li class="dropdown active">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Users<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li class="active"><a href="/admin/affiliates">All Users</a></li>
+                  <li><a href="/admin/approve">Approve Users</a></li>
+                </ul>
+              </li>
+              <li><a href="/admin/approve_ad">Approve Advertisers</a></li>
+              <li><a href="/admin/reports">Reports (X)</a></li>
+              <li><a href="/admin/fraud">Fraud (X)</a></li>
+              <li><a href="/admin/about">About (X)</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
               <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span>Logout (X)</a></li>
@@ -48,57 +57,32 @@
         
         <!-- Begin page content -->
         <div class="container">
-          <% if (mess.length > 0) { %>
-              <div class="alert alert-danger"><%= mess %></div>
-          <% } %>
           <div class="page-header">
-            <h2 id="campaignAmount">Campaigns</h2>
-            <p>Click on any Campaign Name to obtain sales tools/linking methods for that Campaign.</p>
+            <h2 id="usersAmount">Manage The Campaigns</h2>
+            <p></p>
           </div>
-        
+          
           <div class="paddingTop">
             <div class="firstArea panel panel-default">
               <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th>Select</th>
-                    <th>Campaign ID</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Start Date</th>
-                    <th>Expire Date</th>
+                    <th>Affiliate ID</th>
+                    <th>Advertiser ID</th>
+                    <th>Name of Campaign</th>
+                    <th>Total Clicks</th>
+                    <th>Total Leads</th>
+                    <th>Total Sales</th>
                     <th>Short Description</th>
-                    <th>Payment Per Click</th>
+                    <th>Remove?</th>
                   </tr>
                 </thead>
-                <form name=frm1 METHOD="Post" ACTION="Apply_Offers">
-                <tbody id="tableForCampaigns">
-                  <% for (i in message){ %>
-                      <tr id=<%=message[i].Assigned_ID%>><td><input type="checkbox" name=<%=message[i].Assigned_ID%> value=<%=message[i].Name%>></td><td>
-                      <%=message[i].Assigned_ID%> </td><td>
-                      <%=message[i].Name%> </td><td>
-                      <%=message[i].sel1%> </td><td>
-                      <%=message[i].Start_Date.toString().substring(3,15)%>  </td><td>
-                      <%=message[i].End_Date.toString().substring(3,15)%>  </td><td>
-                      <%=message[i].Short_D%>  </td><td>
-                      <%=message[i].Cost_Per_Click%>  </td>
-                  <% } %>
-                  
-                
+                <tbody id="tableForUsers">
                 </tbody>
-                
               </table>
-
             </div>
-            <input class="btn btn-info btn-md btn-block" type="submit" style="width:30%;" role="button" id="submitCampaign" value='Select Offers'>
-          </form>
           </div>
         </div>
-      </div>
-    </div>
-    <div id="footer">
-      <div class="">
-        <p class="text-muted credit">Footer <a href="#">Footer</a></p>
       </div>
     </div>
     <script>$(function () {
@@ -112,6 +96,7 @@
     });
     });</script>
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/loadCampaigns.js"></script>
     <script>
     $('.navbar .dropdown').hover(function() {

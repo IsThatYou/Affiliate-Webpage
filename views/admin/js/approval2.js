@@ -1,5 +1,5 @@
 $(function() {
-  var socket = io("http://192.168.0.46:3000/");
+  var socket = io("http://127.0.0.1:3000/");
   socket.emit("application ad info");
   $("#app-content").append("There seems to be nothing left.");
 
@@ -29,7 +29,7 @@ $(function() {
                     "<div class='col-md-4'><h6>Search Engine Optimization: <strong>" + data.SEO + "</strong></h6></div>"+
                   "</div>" +
                   "<div>" +
-                    "<div class='col-md-8'><h6>Address: <strong>" + data.Address1 + data.City + data.State + data.Country + data.Zip + "</strong></h6></div>" +
+                    "<div class='col-md-8'><h6>Address: <strong>" + data.Address + data.City + data.State + data.Country + data.Zip + "</strong></h6></div>" +
                     "<div class='col-md-4'><h6>Phone: <strong>" + data.Phone + "</strong></h6></div>" +
                     
                   "</div>" +
@@ -47,31 +47,21 @@ $(function() {
     console.log(data.results.length);
     if (data.results.length > 0){
     for (var i in data.results){
-      if (data.results[i].Affiliate_Marketing != 'null'){
+      if (data.results[i].Affiliate_Marketing != 'No'){
         data.results[i].Affiliate_Marketing = 'Yes';
-      } else{
-        data.results[i].Affiliate_Marketing = 'No';
-      }
-      if (data.results[i].Media_Buying != 'null'){
+      } 
+      if (data.results[i].Media_Buying != 'No'){
         data.results[i].Media_Buying = 'Yes';
-      } else{
-        data.results[i].Media_Buying = 'No';
-      }
-      if (data.results[i].Campaign_Dev != 'null'){
+      } 
+      if (data.results[i].Campaign_Dev != 'No'){
         data.results[i].Campaign_Dev = 'Yes';
-      } else{
-        data.results[i].Campaign_Dev = 'No';
-      }
-      if (data.results[i].Lead_Gene != 'null'){
+      } 
+      if (data.results[i].Lead_Gene != 'No'){
         data.results[i].Lead_Gene = 'Yes';
-      } else{
-        data.results[i].Lead_Gene = 'No';
-      }
-      if (data.results[i].SEO != 'null'){
+      } 
+      if (data.results[i].SEO != 'No'){
         data.results[i].SEO = 'Yes';
-      } else{
-        data.results[i].SEO = 'No';
-      }
+      } 
 
       updateHTML(data.results[i]);
     }}

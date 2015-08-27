@@ -15,7 +15,7 @@
     <div name="wrap">
       
     <!-- Fixed navbar -->
-      <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar navbar-default navbar-fixed-top">
         <div class="container">
           <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -27,18 +27,27 @@
           </div>
           <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-              <li><a href="/reports">Home</a></li>
+              <li><a href="/admin/reports">Home (X)</a></li>
               <li class="dropdown active">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Campaigns<b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="/adcampaigns">My Campaigns (X)</a></li>
-
-                  <li><a href="/Create_Campaign">Create Campaigns</a></li>
+                  <li><a href="/admin/all_campaigns">All Campaigns </a></li>
+                  <li class="active"><a href="/admin/Create_Campaign">Create Campaign</a></li>
+                  <li><a href="/admin/details">Details (X)</a></li>
+                  <li><a href="/admin/approve_offers">Approve Offers</a></li>
                 </ul>
               </li>
-            
-              <li><a href="/reports">Reports (X)</a></li>
-              <li><a href="/about">About (X)</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Users<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="/admin/affiliates">All Users</a></li>
+                  <li><a href="/admin/approve">Approve Users</a></li>
+                </ul>
+              </li>
+              <li><a href="/admin/approve_ad">Approve Advertisers</a></li>
+              <li><a href="/admin/reports">Reports (X)</a></li>
+              <li><a href="/admin/fraud">Fraud (X)</a></li>
+              <li><a href="/admin/about">About (X)</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
               <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span>Logout (X)</a></li>
@@ -50,13 +59,56 @@
         <!-- Begin page content -->
         <div class="container">
           <div class="page-header">
-            <h2>Create a New Campaign</h2>
+            <h2>Edit Campaign</h2>
             <div class="collapse" name="campaignDescription">
             </div>
           </div>
-          <form  method='post' action='/admin/Create_Campaign' enctype="multipart/form-data">
+          <form  method='post' action='/admin/Update_Campaign' enctype="multipart/form-data">
         
           <div class="content">
+            <!---->
+            <!--for future implementation
+
+            <div class="paddingTop">
+            <div class="secondArea panel panel-default">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Affiliate ID</th>
+                    <th>Name</th>
+                    <th>Company</th>
+                    <th>Banner Views</th>
+                    <th>Clicks</th>
+                    <th>Clickthru</th>
+                    <th>Leads</th>
+                    <th>S/U</th>
+                    <th>Num Sales</th>
+                    <th>Sales</th>
+                    <th>Sub Sales</th>
+                    <th>Comm</th>
+                  </tr>
+                </thead>
+                <tbody id='tableForAffiliates'>
+                </tbody>
+                <tfooter>
+                <tr>
+                  <th>Total:</th>
+                  <th></th>
+                  <th></th>
+                  <th id="bannerViews"></th>
+                  <th id="clicks"></th>
+                  <th></th>
+                  <th id="leads"></th>
+                  <th></th>
+                  <th></th>
+                  <th id="sales"></th>
+                  <th id="subSales"></th>
+                  <th id="comm"></th>
+                </tr>
+                </tfooter>
+              </table>
+            </div>
+          </div>-->
             
             <div class="firstArea panel panel-default">
               <div class="row">
@@ -67,11 +119,20 @@
                   
                   <div class="checkbox">
                     <input type="hidden" name="CostPerLead" value="">
+                    <% if (message.Cost_Per_Lead == ',Y') {%> 
+                    <label><input type="checkbox" name="CostPerLead" value="Y" checked>Cost Per Lead <%=message.Name%></label>
+                    <% } else { %>
                     <label><input type="checkbox" name="CostPerLead" value="Y">Cost Per Lead</label>
+                    <% } %>
                   </div>
                   <div class="checkbox">
+                    
                     <input type="hidden" name="CostPerClick" value="">
+                    <% if (message.Cost_Per_Click == ',Y') {%> 
+                    <label><input type="checkbox" name="CostPerClick" value="Y" checked>Cost Per Click</label>
+                    <% } else { %>
                     <label><input type="checkbox" name="CostPerClick" value="Y">Cost Per Click</label>
+                    <% } %>
                   </div>
                   <div class="checkbox">
                     <input type="hidden" name="CostPerTI" value="">
@@ -84,7 +145,11 @@
                   <div class="checkbox">
                     <label>
                       <input type="hidden" name="CostPerSale" value="">
-                      <input type="checkbox" value="Y" name="CostPerSale" id="CostPerSale">Cost Per Sale</label>
+                      <% if (message.Cost_Per_Sale == ',Y') {%> 
+                      <input type="checkbox" value="Y" name="CostPerSale" id="CostPerSale" checked>Cost Per Sale</label>
+                      <% } else { %>
+                      <input type="checkbox" value="Y" name="CostPerSale" id="CostPerSale" >Cost Per Sale</label>
+                      <% } %>
                     </div>
                   </div>
                   <div class="col-xs-8">
@@ -125,11 +190,14 @@
                     <div class="col-xs-8">
                       <div class="radio" style="display:inline">
                         <input type="hidden" name="SCP" value=""></label>
+
                         <label><input type="radio" name="SCP" value="Y">Yes</label>
                       </div>
+
                       <div class="radio" style="display:inline">
                         <label><input type="radio" name="SCP" value="">No</label>
                       </div>
+
                     </div>
                   </div>
                 </div>
@@ -145,50 +213,50 @@
                     <div class="col-xs-4 padding">Name:
                     </div>
                     <div class="col-xs-8 padding">
-                      <input type="text" class="form-control" name="newCampaignName" placeholder="Name of the campaign" required>
+                      <input type="text" class="form-control" name="newCampaignName" placeholder="Name of the campaign" value= <%=message.Name%> required>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-xs-4 padding">Adveritser ID:
                     </div>
                     <div class="col-xs-8 padding">
-                      <input type="text" class="form-control" name="add_id" placeholder="Name of the campaign" required>
+                      <input type="text" class="form-control" name="add_id" placeholder="ID of the Advertiser" value=<%= message.Advertiser_ID%> required>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-xs-4 padding">URL:
+                    <div class="col-xs-4 padding">URL: 
                     </div>
                     <div class="col-xs-8 padding">
-                      <input type="text" class="form-control" name="campaignUrl" placeholder="URL of the campaign" required>
+                      <input type="text" class="form-control" name="campaignUrl" placeholder="URL of the campaign" value=<%= message.Url %> required>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-xs-4 padding">Long Description:
+                    <div class="col-xs-4 padding">Long Description: 
                     </div>
                     <div class="col-xs-8 padding">
                       
-                      <textarea name = "longD" class="form-control" cols="50" placeholder="Long Description: Will be displayed when viewing the campaign details via the affiliate interface."></textarea>
+                      <textarea name = "longD" class="form-control" cols="50" placeholder="Long Description: Will be displayed when viewing the campaign details via the affiliate interface." value=<%= message.Long_D %>></textarea>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-xs-4 padding">Short Description:
                     </div>
                     <div class="col-xs-8 padding">
-                      <textarea name = "shortD" class="form-control" cols="50" placeholder="Short Description: Will be displayed in the campaign listing table in the affiliate interface."></textarea>
+                      <textarea name = "shortD" class="form-control" cols="50" placeholder="Short Description: Will be displayed in the campaign listing table in the affiliate interface." value=<%= message.Short_D %>></textarea>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-xs-4 padding">Start Date:
                     </div>
                     <div class="col-xs-8 padding" name="payout">
-                      <input type="text" placeholder="" name="start_date" class="datepicker form-control">
+                      <input type="text" placeholder="" name="start_date" class="datepicker form-control" value=<%= message.Start_Date %>>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-xs-4 padding">End Date:
                     </div>
                     <div class="col-xs-8 padding" name="payout">
-                      <input  type="text" placeholder="" name="end_data" class="datepicker form-control">
+                      <input  type="text" placeholder="" name="end_data" class="datepicker form-control" value=<%=message.End_Date%>>
                     </div>
                   </div>
                   <div class="row">
@@ -228,35 +296,35 @@
                   <div class="col-xs-4 padding">Clicks Offered to Affiliates:
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control"  name="offeredClicks">
+                    <input type="text" class="form-control"  name="offeredClicks" value=<%=message.Offered_Clicks%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Leads Offered to Affiliates:
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" name="offeredLeads">
+                    <input type="text" class="form-control" name="offeredLeads" value=<%=message.Offered_Leads%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Gross Sales Offered to Affiliates:
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" name="offeredSales">
+                    <input type="text" class="form-control" name="offeredSales" value=<%=message.Offered_Sales%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Impressions Offered to Affiliates (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" name="offeredImpressions">
+                    <input type="text" class="form-control" name="offeredImpressions"value=<%=message.Offered_Impression%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Co-Registrations Offered to Affiliates (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" name="offeredCoRegistrations">
+                    <input type="text" class="form-control" name="offeredCoRegistrations"value=<%=message.Offered_CoRegi%>>
                   </div>
                 </div>
               </div>
@@ -272,7 +340,7 @@
                   <div class="col-xs-4 padding">Total Payout Per Affiliate:
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control"  name="payoutperaffiliate">
+                    <input type="text" class="form-control"  name="payoutperaffiliate" value=<%=message.Affiliate_Per_Affiliate%>>
                   </div>
                 </div>
 
@@ -280,54 +348,73 @@
                   <div class="col-xs-4 padding">Per Click Affiliate Payout:
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control"  name="affiliatePerClick">
+                    <input type="text" class="form-control"  name="affiliatePerClick" value=<%=message.Affiliate_Per_Click%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Per Lead Affiliate Payout:
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" name="affiliateLeadPerClick">
+                    <input type="text" class="form-control" name="affiliateLeadPerClick" value=<%=message.Affiliate_Lead_PC%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Per 1000 Impression Affiliate Payout (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" name="affiliateImpressionPerClick">
+                    <input type="text" class="form-control" name="affiliateImpressionPerClick"value=<%=message.Affiliate_Impression_PC%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">% Per Sale Affiliate Payout:
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" id="offeredImpressions" placeholder="Per Sale" name="affiliatePerSale">
-                    <input type="hidden" class="form-control" name="affiliatePerSubSale" placeholder="Per Sub Sale">
+                    <input type="text" class="form-control" id="offeredImpressions" placeholder="Per Sale" name="affiliatePerSale" value=<%=message.Affiliate_Per_Sale%>>
+                    <input type="hidden" class="form-control" name="affiliatePerSubSale" placeholder="Per Sub Sale" <%=message.Affiliate_Per_Sub_Sale%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Flat Per Sale Affiliate Payout (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
-                    <input type="text" class="form-control" id="offeredCoRegistrations" placeholder="Per Sale" name="affiliateFlatPerSale">
-                    <input type="text" class="form-control" id="offeredCoRegistrations" placeholder="Per Sub Sale" name="affiliateFlatPerSubSale">
+                    <input type="text" class="form-control" id="offeredCoRegistrations" placeholder="Per Sale" name="affiliateFlatPerSale" <%=message.Affiliate_Flat_Per_Sale%>>
+                    <input type="text" class="form-control" id="offeredCoRegistrations" placeholder="Per Sub Sale" name="affiliateFlatPerSubSale" <%=message.Affiliate_Flat_Per_Sub_Sale%>>
                   </div>
                 </div>
                 <div class="row">
                   <div class="col-xs-4 padding">Network Run (Not Added)
                   </div>
                   <div class="col-xs-8 padding">
-                    <div class="radio">
-                      <label><input type="radio" name="run" value="CS" checked>Category-Specific</label>
+                    <div class="radio" autocomplete="off">
+                        <% if (message.run == "CS") { %>
+                      <label><input type="radio" name="run" value="CS" autocomplete="off" checked>Category-Specific</label>
+                      <% } else { %>
+                      <label><input type="radio" name="run" value="CS" autocomplete="off">Category-Specific</label>
+                      <% } %>
                     </div>
-                    <div class="radio">
-                      <label><input type="radio" name="run" value="EN">Entire Network</label>
+
+                    <div class="radio" autocomplete="off">
+                        <% if ( message.run == "EN") { %>
+                      <label><input type="radio" name="run" value="EN" autocomplete="off" checked>Entire Network</label>
+                      <% } else { %>
+                        <label><input type="radio" name="run" value="EN" autocomplete="off">Entire Network </label>
+                        <% } %>
                     </div>
-                    <div class="radio">
-                      <label><input type="radio" name="run" value="S">Select</label>
+
+                    <div class="radio" autocomplete="off">
+                        <% if ( message.run == "S") { %>
+                      <label><input type="radio" name="run" value="S" autocomplete="off" checked>Select</label>
+                      <% } else { %>
+                      <label><input type="radio" name="run" value="S" autocomplete="off">Select</label>
+                      <% } %>
                     </div>
-                    <div class="radio">
-                      <label><input type="radio" name="run" value="P">Private</label>
+
+                    <div class="radio" autocomplete="off">
+                        <% if ( message.run == "P") { %>
+                      <label><input type="radio" name="run" value="P" checked autocomplete="off">Private</label>
+                      <% } else { %>
+                      <label><input type="radio" name="run" value="P" autocomplete="off">Private</label>
+                      <% } %>
                     </div>
                   </div>
                 </div>
@@ -346,8 +433,8 @@
                 </div>
                 <div class="col-xs-8 padding">
                   <div class="form-group">
-                    <select class="form-control" name="sel1">
-                      <option selected="selected">Select a Category</option>
+                    <select class="form-control" name="sel1" autocomplete="off">
+                      <option selected="selected" value=<%= message.sel1%>><%= message.sel1%></option>
                       <option>Arts & Entertainment</option>
                       <option>Autos & Vehicles</option>
                       <option>Beauty & Fitness</option>
@@ -384,8 +471,8 @@
                 </div>
                 <div class="col-xs-8 padding">
                   <div class="form-group">
-                    <select class="form-control" name="sel2">
-                      <option selected="selected">Select a Category</option>
+                    <select class="form-control" name="sel2" autocomplete="off">
+                      <option selected="selected" value=<%= message.sel2%>><%= message.sel2%></option>
                      <option>Arts & Entertainment</option>
                       <option>Autos & Vehicles</option>
                       <option>Beauty & Fitness</option>
@@ -422,8 +509,8 @@
                 </div>
                 <div class="col-xs-8 padding">
                   <div class="form-group">
-                    <select class="form-control" name="sel3">
-                      <option selected="selected">Select a Category</option>
+                    <select class="form-control" name="sel3" autocomplete="off">
+                      <option selected="selected" value=<%= message.sel3%>><%= message.sel3%></option>
                        <option>Arts & Entertainment</option>
                       <option>Autos & Vehicles</option>
                       <option>Beauty & Fitness</option>
@@ -471,23 +558,47 @@
                 <div class="col-xs-8 padding">
                   <div class="checkbox" style="display:inline">
                     <input type="hidden" name="NDate" value="">
+                    <% if (message.NDate == ',Y') { %>
+                    <label><input type="checkbox" name="NDate" value="Y" checked>Date</label>
+                    <% } else { %>
                     <label><input type="checkbox" name="NDate" value="Y">Date</label>
+                    <% } %>
                   </div>
+
                   <div class="checkbox" style="display:inline">
                     <input type="hidden" name="NClicks" value="">
+                    <% if (message.NClicks == ',Y') { %>
+                    <label><input type="checkbox" name="NClicks" value="Y" checked>Clicks</label>
+                    <% } else { %>
                     <label><input type="checkbox" name="NClicks" value="Y">Clicks</label>
+                    <% } %>
                   </div>
+
                   <div class="checkbox" style="display:inline">
                     <input type="hidden" name="NLeads" value="">
-                    <label><input type="checkbox" name="NLeads" value="Y">Leads</label>
+                    <% if (message.NLeads == ',Y') { %>
+                    <label><input type="checkbox" name="NLeads" value="Y" checked>Leads</label>
+                     <% } else { %>
+                     <label><input type="checkbox" name="NLeads" value="Y">Leads</label>
+                    <% } %>
                   </div>
+
                   <div class="checkbox" style="display:inline">
                     <input type="hidden" name="NSales" value="">
+                    <% if (message.NSales == ',Y') { %>
+                    <label><input type="checkbox" name="NSales" value="Y" checked>Sales</label>
+                    <% } else { %>
                     <label><input type="checkbox" name="NSales" value="Y">Sales</label>
+                    <% } %>
                   </div>
+
                   <div class="checkbox" style="display:inline">
                     <input type="hidden" name="NImpression" value="">
+                    <% if (message.NImpression == ',Y') { %>
+                    <label><input type="checkbox" name="NImpression" value="Y" checked>Impression</label>
+                    <% } else { %>
                     <label><input type="checkbox" name="NImpression" value="Y">Impression</label>
+                    <% } %>
                   </div>
                 </div>
               </div>
@@ -495,42 +606,42 @@
                 <div class="col-xs-4 padding">Notification Date:
                 </div>
                 <div class="col-xs-8 padding" name="payout">
-                  <input type="text" placeholder="" name="NotifDate" class="datepicker form-control">
+                  <input type="text" placeholder="" name="NotifDate" class="datepicker form-control" value=<%=message.Notif_Date%>>
                 </div>
               </div>
               <div class="row">
                 <div class="col-xs-4 padding">Clicks Level:
                 </div>
                 <div class="col-xs-8 padding">
-                  <input type="text" class="form-control"  name="clicks_level">
+                  <input type="text" class="form-control"  name="clicks_level" value=<%=message.Clicks_Level%>>
                 </div>
               </div>
               <div class="row">
                 <div class="col-xs-4 padding">Leads Level:
                 </div>
                 <div class="col-xs-8 padding">
-                  <input type="text" class="form-control" name="leads_level">
+                  <input type="text" class="form-control" name="leads_level" value=<%=message.Leads_Level%>>
                 </div>
               </div>
               <div class="row">
                 <div class="col-xs-4 padding">Sales Level (Total gross sales):
                 </div>
                 <div class="col-xs-8 padding">
-                  <input type="text" class="form-control" name="sales_level">
+                  <input type="text" class="form-control" name="sales_level" value=<%=message.Sales_Level%>>
                 </div>
               </div>
               <div class="row">
                 <div class="col-xs-4 padding">Impressions Level:
                 </div>
                 <div class="col-xs-8 padding">
-                  <input type="text" class="form-control" name="impressions_level">
+                  <input type="text" class="form-control" name="impressions_level" value=<%=message.Impression_Level%>>
                 </div>
               </div>
               <div class="row">
                 <div class="col-xs-4 padding">Threshold Email:
                 </div>
                 <div class="col-xs-8 padding">
-                  <input type="text" class="form-control" name="threshols_email">
+                  <input type="text" class="form-control" name="threshols_email" value=<%=message.Threshold_Email%>>
                 </div>
               </div>
             </div>
@@ -547,16 +658,30 @@
                 </div>
                 <div class="col-xs-8 padding">
                   <div class="radio" style="display:inline">
-                    <label><input type="radio" name="typeofTracking" value="pixel" checked>Pixel Tracking</label>
+                    <% if (message.Type_Tracking == "pixel") { %>
+                    <label><input type="radio" name="typeofTracking" value="pixel" checked autocomplete = "off">Pixel Tracking</label>
+                    <% } else { %>
+                    <label><input type="radio" name="typeofTracking" value="pixel" autocomplete = "off">Pixel Tracking</label>
+                    <% } %>
+
                   </div>
                   <div class="radio" style="display:inline">
-                    <label><input type="radio" name="typeofTracking" value="host">Hosted</label>
+                    <% if (message.Type_Tracking == "host") { %>
+                    <label><input type="radio" name="typeofTracking" value="host" autocomplete = "off" checked>Hosted</label>
+                    <% } else { %>
+                    <label><input type="radio" name="typeofTracking" value="host" autocomplete = "off">Hosted</label>
+                    <% } %>
                   </div>
-                  <div class="radio" style="display:inline">
-                    <label><input type="radio" name="typeofTracking" value="import">Imported</label>
+                  <div class="radio" style="display:inline" id="import">
+                    <% if (message.Type_Tracking == "import") { %>
+                    <label><input type="radio" name="typeofTracking" value="import" autocomplete = "off" checked>Imported</label>
+                    <% } else { %>
+                    <label><input type="radio" name="typeofTracking" value="import" autocomplete = "off">Imported </label>
+                    <% } %>
                   </div>
-                  
-                  <input type="text" class="form-control" name="tracking_pixel" placeholder="Autogenerated if left blank">
+                  <input type="text" class="form-control" id="tracking_pixel" name="tracking_pixel" placeholder="Autogenerated if left blank" value="<%- message.Tracking_Pixel %>">
+ 
+              </input>
                 </div>
               </div>
             </div>
@@ -573,16 +698,27 @@
                 </div>
                 <div class="col-xs-8 padding">
                   
-                  <div class="radio">
-                    
-                    <label><input type="radio" name="country" id="allCountriesButton" value="all" checked>All Countries</label>
-                  </div>
-                  <div class="radio">
-                    <label><input type="radio" name="country" value="spe" id="specificCountriesButton">Specific Countries</label>
-                  </div>
+                  
+                    <% if (message.Country == "all"){ %>
+                        <div class="radio">
+                            <label><input type="radio" name="country" id="allCountriesButton" value="all" checked>All Countries</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="country" value="spe" id="specificCountriesButton">Specific Countries</label>
+                        </div>
+                    <% } else { %>
+                        <div class="radio">
+                            <label><input type="radio" name="country" id="allCountriesButton" value="all">All Countries</label>
+                        </div>
+                        <div class="radio">
+                            <label><input type="radio" name="country" value="spe" id="specificCountriesButton" checked>Specific Countries</label>
+                        </div>
+                    <% } %>
+
+
                   <input type="hidden" name="specountry" value="">
-                  <select multiple class="form-control" id="countries" name="specountry" disabled>
-                    <option selected value="">Select One</option>
+                  <select multiple class="form-control" id="countries" name="specountry" disabled autocomplete="off">
+                    <option selected value=<%= message.Specific_Country%>><%= message.Specific_Country.substring(1)%></option>
                     <option value="Afganistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
                     <option value="Algeria">Algeria</option>
@@ -848,8 +984,9 @@
                 <div class="col-xs-4 padding">Notes:
                 </div>
                 <div class="col-xs-8 padding">
-                  <textarea class="form-control" name="note" cols="50" placeholder="Use this field to capture any campaign-specific information you may need to convey to other DT users."></textarea>
+                  <textarea class="form-control" name="note" cols="50" placeholder="Use this field to capture any campaign-specific information you may need to convey to other DT users."><%=message.Note %></textarea>
                 </div>
+                <input type="hidden" name="id" value=<%=message.Assigned_ID%>>
               </div>
             </div>
             <div class="paddingTop">
@@ -857,8 +994,8 @@
                 <div class="row">
                   <div class="col-xs-4 padding"></div>
                   <div class="col-xs-8 centered padding">
-                    
-                    <INPUT TYPE="submit" style="width:50%" VALUE="Add New Campaign" class="btn btn-info btn-md btn-block">
+                    <button type="submit" class="btn btn-warning btn-md btn-block" style="width:100%;" id="submitCampaign">Submit</button>
+                    <a class="btn btn-danger btn-md btn-block" style="width:100%;" role="button" id="deleteCampaign">Delete Campaign</a>
                   </div>
                   </form>
                 </div>
@@ -880,9 +1017,11 @@
       });
       });</script>
 
-      <script src="js/createCampaign.js"></script>
       <script src="js/dropzone.js"></script>
       <script src="js/bootstrap-datepicker.js"></script>
+      <script src="/socket.io/socket.io.js"></script>
+        <script src="js/editCampaign.js"></script>
+      <script src="js/loadAffiliates.js"></script>
       <script>
       $('.navbar .dropdown').hover(function() {
       $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
@@ -894,7 +1033,7 @@
       $(document).ready(function () {
       
       $('.datepicker').datepicker({
-      format: "mm/dd/yyyy"
+      format: "yyyy-mm-dd"
       });
       
       });

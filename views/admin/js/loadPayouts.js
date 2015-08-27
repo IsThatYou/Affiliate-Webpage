@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var socket = io("http://192.168.0.46:3000/");
+    var socket = io("http://127.0.0.1:3000/");
     
     var lasturl = document.referrer;
     var index = lasturl.indexOf("aff_id=");
@@ -9,49 +9,64 @@ $(document).ready(function() {
     socket.emit("payout info", {ID: desire});
     socket.on("payout_info", function(data){
         info = data.payout;
-        for (var i in info){
-            updateHTML(info[i]);
+        other = data.other;
+        console.log(other);
+        console.log(info);
+        for (var i in other){
+            for (var j in info){
+                if (info[j].Offer_ID == other[i].Offer_ID){
+                    if (info[j].Types == "C"){
+                        other[i].Clicks += 1;
+                    }
+                    if (info[j].Types == "L"){
+                        other[i].Leads += 1;
+                    }
+                    if (info[j].Types == "S"){
+                        other[i].Sales += 1;
+                    }
+                }
+            }
+
         }
-        var all = [];
+
+        
+        for (var i in other){
+            updateHTML(other[i]);
+        }
+        
         $('#updateValuesButton').click(function() {
-        var areusure = confirm("Are You Sure to Update?");
+            var areusure = confirm("Are You Sure to Update?");
+            var all = [];
             if (areusure) {
-                for (var r in info){
-                    clicks = $('#clicks' + info[r].Offer_ID).text();
-                    cpc = $('#cpc' + info[r].Offer_ID).text();
+                for (var r in other){
+                    clicks = $('#clicks' + other[r].Offer_ID).text();
+                    cpc = $('#cpc' + other[r].Offer_ID).text();
 
-                    lead = $('#actions' + info[r].Offer_ID).text();
-                    apc = $('#cpa' + info[r].Offer_ID).text();
+                    lead = $('#actions' + other[r].Offer_ID).text();
+                    apc = $('#cpa' + other[r].Offer_ID).text();
 
-                    sales = $('#sales' + info[r].Offer_ID).text();
-                    spc = $('#salesP' + info[r].Offer_ID).text();
+                    sales = $('#sales' + other[r].Offer_ID).text();
+                    spc = $('#salesP' + other[r].Offer_ID).text();
                     var part = {"Clicks": clicks, "cpc": cpc, "lead": lead, "apc": apc, "sales": sales, "spc": spc, "Aff_ID": info[r].Affiliate_ID, "Off_ID": info[r].Offer_ID};
                     all.push(part);
                 }
                 socket.emit("update payouts", {message: all});
             }
-            console.log("lol: " + all[0].cpc);
+
             socket.emit("update payouts", {message: all});
         });
 
         $('#archive').click(function() {
-        var areusure = confirm("Are You Sure to Archive?  The current payout is going to get reinitialized.");
+            var areusure = confirm("Are You Sure to Archive?  Cilick yes if you finished the payment.");
+            var all = [];
             if (areusure) {
-                for (var r in info){
-                    clicks = $('#clicks' + info[r].Offer_ID).text();
-                    cpc = $('#cpc' + info[r].Offer_ID).text();
-
-                    lead = $('#actions' + info[r].Offer_ID).text();
-                    apc = $('#cpa' + info[r].Offer_ID).text();
-
-                    sales = $('#sales' + info[r].Offer_ID).text();
-                    spc = $('#salesP' + info[r].Offer_ID).text();
-                    var part = {"Clicks": clicks, "cpc": cpc, "lead": lead, "apc": apc, "sales": sales, "spc": spc, "Aff_ID": info[r].Affiliate_ID, "Off_ID": info[r].Offer_ID};
-                    all.push(part);
+                for (var r in other){
+                    all.push({"aff_id":other[r].Affiliate_ID, "off_id":other[r].Offer_ID});
                 }
+                socket.emit("archive payouts", {message: all});
             }
-            console.log("lol: " + all[0].cpc);
-            socket.emit("archive payouts", {message: all});
+            
+            
         });
     });
     var totalClicks = 0;
@@ -129,13 +144,39 @@ $(document).ready(function() {
     
     // Updates the list when the update button is pressed
     $('#updateReportButton').click(function() {
-        alert('update the following list');
         var startDate = document.getElementById("start").value;
         var endDate = document.getElementById("end").value;
-        console.log("From " + startDate + " to " + endDate);
+        socket.emit("overview between dates", {aff_id:desire, begin: startDate, end: endDate});
+        console.log("From " + startDate + " to " + endDate + " by " + desire);
         var actionsOnly = document.getElementById("actionsOnly").checked;
         var showSubIDs = document.getElementById("actionsOnly").checked;
         //TODO: new mysql query with the new dates and options
+    });
+    socket.on("overview_between_dates", function(data){
+
+        info = data.message;
+        other = data.other;
+        for (var i in other){
+            for (var j in info){
+                if (info[j].Offer_ID == other[i].Offer_ID){
+                    if (info[j].Types == "C"){
+                        other[i].Clicks += 1;
+                    }
+                    if (info[j].Types == "L"){
+                        other[i].Leads += 1;
+                    }
+                    if (info[j].Types == "S"){
+                        other[i].Sales += 1;
+                    }
+                }
+            }
+
+        }
+
+         $('#tableForPayouts').empty();
+        for (var i in other){
+            updateHTML(other[i]);
+        }
     });
     // $('tr.payoutTable td').click(function() {
     //      $(this).toggleClass("cell");

@@ -1,5 +1,5 @@
 $(function() {
-	var socket = io("http://192.168.0.46:3000/");
+	var socket = io("http://127.0.0.1:3000/");
   socket.emit("application info", {message: '1'});
   $("#app-content").append("There seems to be nothing left.");
   //var $button = $('.btn');
@@ -21,8 +21,8 @@ $(function() {
               "<div class='row'>" +
                 "<div class='padding'>" +
                   "<div>" +
-                    "<div class='col-md-3'><h6> SSN/Tax ID: <strong>" + data.SSN_Tax_ID + "</strong></h6></div>" +
-                    "<div class='col-md-3'><h6>Site URL: <strong>" + data.URL1 + "</strong></h6></div>" +
+                    "<div class='col-md-3'><h6> SSN/Tax ID: <strong>" + data.SSN_TAX_ID + "</strong></h6></div>" +
+                    "<div class='col-md-3'><h6>Site URL: <strong>" + data.Site_URL1 + "</strong></h6></div>" +
                     "<div class='col-md-3'><h6>Site Categories: <strong>" + data.Site_Category1 + "</strong></h6></div>"+
                   "</div>" +
                   "<div>" +

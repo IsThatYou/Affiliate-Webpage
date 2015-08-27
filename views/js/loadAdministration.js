@@ -1,5 +1,4 @@
 $(document).ready(function() {
-alert("load data from database");
 
 var publisher = 'testPublisher';
 var campaignName = 'testCampaignName';
