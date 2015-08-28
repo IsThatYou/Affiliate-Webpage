@@ -659,17 +659,24 @@ app.use(session({
 
 passport.serializeUser(function(user, done) {
 	// if the user is an advertiser, add 'ad' before the ID to differentiate it from affiliates
-
-	console.log('identity: ' + user.Identity);
-	var id = {num:user.Assigned_ID, Identity:user.Identity};
-    done(null, id);
-    });
+	if (user) {
+		if (user == "signup"){
+			done(null, "signup");
+		} else {
+			console.log('identity: ' + user.Identity);
+			var id = {num:user.Assigned_ID, Identity:user.Identity};
+		    done(null, id);
+		}
+	};
+});
 
 //TEST
 passport.deserializeUser(function(id, done) {
 	console.log('test: ' + id.Identity);
 	console.log(!id.Identity);
-	if (id.Identity == 'ad'){
+	if (id == "signup"){
+		done(null, "signing up");
+	} else if (id.Identity == 'ad'){
 		console.log("guacomoli" + id.num);
 		pool.getConnection(function(err, connection){
 	    	connection.query("SELECT * FROM advertiser_info WHERE Assigned_ID = ? ",[id.num], function(err, rows){
@@ -707,27 +714,51 @@ app.get('/login', function(req, res, err){
 
 // ABOUT Main Page
 app.get('/about', function(req, res, err){
-	res.render('MainPageAbout.ejs', {message: req.user});
+	if (req.user == "signing up"){
+		res.render('MainPageAbout.ejs', {message: null});
+	} else {
+		res.render('MainPageAbout.ejs', {message: req.user});
+	}
 });
 // CONTACT Main Page
 app.get('/contact', function(req, res, err){
-	res.render('MainPageContact.ejs', {message: req.user});
+	if (req.user == "signing up"){
+		res.render('MainPageContact.ejs', {message: null});
+	} else {
+		res.render('MainPageContact.ejs', {message: req.user});
+	}
 });
 // ADVERTISER Main Page
 app.get('/advertiser', function(req, res, err){
-	res.render('MainPageAdvertiser.ejs', {message: req.user});
+	if (req.user == "signing up"){
+		res.render('MainPageAdvertiser.ejs', {message: null});
+	} else {
+		res.render('MainPageAdvertiser.ejs', {message: req.user});
+	}
+
 });
 // AFFILIATE Main Page
 app.get('/affiliate', function(req, res, err){
-	res.render('MainPageAffiliate.ejs', {message: req.user});
+	if (req.user == "signing up"){
+		res.render('MainPageAffiliate.ejs', {message: null});
+	} else {
+		res.render('MainPageAffiliate.ejs', {message: req.user});
+	}
+
 });
 // MAIN PAGE
 app.get('/', function(req, res, err){
-	res.render('MainPage.ejs', {message: req.user});
+	console.log(req.user);
+	console.log(req.session);
+	if (req.user == "signing up"){
+		res.render('MainPage.ejs', {message: null});
+	} else {
+		res.render('MainPage.ejs', {message: req.user});
+	}
 });
 // THANK YOU PAGE
 app.get('/thankyou', function(req, res, err){
-	res.render('thankYou.ejs');
+	res.render('thankYou.ejs', {message: req.flash('thankyouMessage')});
 });
 
 passport.use(
@@ -939,7 +970,7 @@ passport.use(
 						    sql1 = "SELECT * FROM client_info WHERE Email = ?"
 						    connection.query(sql1, [username], function(err, rows){
 						    	console.log(rows[0]);
-						    	return done(null, rows[0]);
+						    	return done(null, "signing up",req.flash('thankyouMessage', 'Thank you for signing up as an affiliate'));
 						    	
 						    });
 						    
@@ -1050,7 +1081,7 @@ passport.use(
 						    sql1 = "SELECT * FROM advertiser_info WHERE Email = ?"
 						    connection.query(sql1, [username], function(err, rows){
 						    	console.log(rows[0]);
-						    	return done(null, rows[0]);
+						    	return done(null, "signup",req.flash('thankyouMessage', 'Thank you for signing up as an advertiser'));
 						    	
 						    });
 						    
@@ -1063,7 +1094,7 @@ passport.use(
 		}));
 
 app.post('/signup_ad', passport.authenticate('local-signup-ad', {
-		successRedirect : '/login', // redirect to the secure profile section
+		successRedirect : '/thankyou', // redirect to the secure profile section
 		failureRedirect : '/signup_ad', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 }));
@@ -1453,6 +1484,7 @@ app.post('/Create_Campaign', upload.array('fileUploaded', 12), function (req, re
 		    // Don't use the connection here, it has been returned to the pool.
 	  	});
 	});
+	res.render("thankYou.ejs", {message: 'Thank you for creating the campaign'});
 
 });
 
@@ -1836,7 +1868,8 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 						"Tracking_Pixel," +
 						"Country," +
 						"Specific_Country," +
-						"Note)" +
+						"Note," +
+						"approved)" +
 						" VALUES " +
 						"(" + 
 						'"' + req.body[proparray[0]] + '",' +
@@ -1887,7 +1920,8 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 						'"' + req.body[proparray[45]] + '",' +
 						'"' + req.body[proparray[46]] + '",' +
 						'"' + country + '",' +
-						'"' + req.body[proparray[48]] + 
+						'"' + req.body[proparray[48]] + '",' +
+						'"' + '1' + 
 						'");';
 	console.log(info);
 	var camp_id = 2;
@@ -1901,8 +1935,8 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 
 		    // get the advertiser_id of the row just inserted
 		    	if (parallel_universe == false){
-		    		var tracking_pixel = 
-			    	sql2 = 'UPDATE campaigns SET Tracking_Pixel="' + "<script type='text/javascript'> var ClickMeter_pixel_url = '//127.0.0.1:3000/pixel.gif?off_id=" + fields.insertId +"aff_id=" + req.body['add_id'] +"'; </script> <script type='text/javascript' id='cmpixelscript' src='//s3.amazonaws.com/scripts-clickmeter-com/js/pixelNew.js'></script> <noscript> <img height='0' width='0' alt='' src='http://127.0.0.1:3000/pixel.gif' /> </noscript>" +
+
+			    	sql2 = 'UPDATE campaigns SET Tracking_Pixel="' + "<script type='text/javascript'> var ClickMeter_pixel_url = '//127.0.0.1:3000/pixel.gif?off_id=" + fields.insertId +"&add_id=" + req.body['add_id'] +"'; </script> <script type='text/javascript' id='cmpixelscript' src='//s3.amazonaws.com/scripts-clickmeter-com/js/pixelNew.js'></script> <noscript> <img height='0' width='0' alt='' src='http://127.0.0.1:3000/pixel.gif' /> </noscript>" +
 			    	'" WHERE Assigned_ID = ' + fields.insertId + ";";
 			    	console.log(sql2);
 			    	connection.query(sql2, function(err, rows){
@@ -1946,6 +1980,7 @@ app.post('/admin/Create_Campaign', upload.array('fileUploaded', 12), function (r
 		    // Don't use the connection here, it has been returned to the pool.
 	  	});
 	});
+	res.redirect('/admin/all_campaigns');
 
 });
 

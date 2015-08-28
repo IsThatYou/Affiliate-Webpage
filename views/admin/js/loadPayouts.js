@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var socket = io("http://127.0.0.1:3000/");
+    var socket = io();
     
     var lasturl = document.referrer;
     var index = lasturl.indexOf("aff_id=");

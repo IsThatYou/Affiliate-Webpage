@@ -1,5 +1,5 @@
 $(function() {
-	var socket = io("http://127.0.0.1:3000/");
+	var socket = io();
   socket.emit("application info", {message: '1'});
   $("#app-content").append("There seems to be nothing left.");
   //var $button = $('.btn');

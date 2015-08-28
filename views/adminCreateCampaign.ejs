@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>MEDIA Company - Create Campaign</title>
+    <title>Create Campaign - Inspior Media</title>
     <link href="css/styles.css" rel="stylesheet" type="text/css">
     <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/yeti/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/datepicker.css">
@@ -12,8 +12,8 @@
   </head>
   <body>
     <!-- Wrap all page content here -->
-    <div name="wrap">
-      
+    <div id="wrap">
+
     <!-- Fixed navbar -->
       <div class="navbar navbar-default navbar-fixed-top">
         <div class="container">
@@ -23,7 +23,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">MEDIA Company</a>
+            <a class="navbar-brand" href="#">Inspior Media</a>
           </div>
           <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
@@ -38,10 +38,10 @@
                 </ul>
               </li>
               <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Users<b class="caret"></b></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Affiliates<b class="caret"></b></a>
                 <ul class="dropdown-menu">
-                  <li><a href="/admin/affiliates">All Users</a></li>
-                  <li><a href="/admin/approve">Approve Users</a></li>
+                  <li><a href="/admin/affiliates">All Affiliates</a></li>
+                  <li><a href="/admin/approve">Approve Affiliates</a></li>
                 </ul>
               </li>
               <li><a href="/admin/approve_ad">Approve Advertisers</a></li>
@@ -50,7 +50,7 @@
               <li><a href="/admin/about">About (X)</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-              <li><a href="/affiliateLogin.html"><span class="glyphicon glyphicon-log-out"></span>Logout (X)</a></li>
+              <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
             </ul>
             </div><!--/.nav-collapse -->
           </div>
@@ -58,10 +58,8 @@
         
         <!-- Begin page content -->
         <div class="container">
-          <div class="page-header">
+          <div class="page-header" >
             <h2>Create a New Campaign</h2>
-            <div class="collapse" name="campaignDescription">
-            </div>
           </div>
           <form  method='post' action='/admin/Create_Campaign' enctype="multipart/form-data">
         
@@ -82,13 +80,19 @@
                     <input type="hidden" name="CostPerClick" value="">
                     <label><input type="checkbox" name="CostPerClick" value="Y">Cost Per Click</label>
                   </div>
-                  <div class="checkbox">
-                    <input type="hidden" name="CostPerTI" value="">
+                    <div class="checkbox">
+                    <label>
+                      <input type="hidden" name="CostPerSale" value="">
+                      <input type="checkbox" value="Y" name="CostPerSale" id="CostPerSale">Cost Per Sale</label>
+                    </div>
+                  <div class="checkbox" style="display: none;">
+                    <input type="hidden" name="CostPerTI" value="" >
                     <label><input type="checkbox" name="CostPerTI" value="Y">Cost Per Thousand Impressions (Not Added)</label>
                   </div>
                 </div>
               </div>
-              <div class="row">
+
+              <div class="row" style="display:none">
                 <div class="col-xs-4">
                   <div class="checkbox">
                     <label>
@@ -96,14 +100,14 @@
                       <input type="checkbox" value="Y" name="CostPerSale" id="CostPerSale">Cost Per Sale</label>
                     </div>
                   </div>
-                  <div class="col-xs-8">
+                  <div class="col-xs-8" style="display: none;">
                     <div class="checkbox">
                       <input type="hidden" name="monthlyRecurringPayment" id="mrp" value="">
                       <label><input type="checkbox" name="monthlyRecurringPayment" id="monthlyRecurringPayment" value="Y" disabled="true">Recurring Monthly Payout (subscription) MUST BE COST PER SALE (Not Added)</label>
                     </div>
                   </div>
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;">
                   <div class="col-xs-4 padding">
                     <div class="checkbox">
                       <div class="checkbox">
@@ -113,7 +117,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;">
                   <div class="col-xs-4">
                     <div class="checkbox">
                       <label>
@@ -121,13 +125,13 @@
                         <input type="checkbox" value="Y" name="Popup">Popup/Popunder Program (Not Added)</label>
                       </div>
                     </div>
-                    <div class="col-xs-8">
+                    <div class="col-xs-8" style="display: none;">
                       <div class="checkbox">
                         <input type="number" name="popUnderUpValue" class="form-control"style="display:inline;width:20%">Pop(under/up) Expiration Time (Hours) (Not Added)
                       </div>
                     </div>
                   </div>
-                  <div class="row">
+                  <div class="row" style="display: none;">
                     <div class="col-xs-4">
                       Share Campaign Performance (Not Added)
                     </div>
@@ -158,7 +162,7 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-xs-4 padding">Adveritser ID:
+                    <div class="col-xs-4 padding">Advertiser ID:
                     </div>
                     <div class="col-xs-8 padding">
                       <input type="text" class="form-control" name="add_id" placeholder="Name of the campaign" required>
@@ -254,14 +258,14 @@
                     <input type="text" class="form-control" name="offeredSales">
                   </div>
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;">
                   <div class="col-xs-4 padding">Impressions Offered to Affiliates (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
                     <input type="text" class="form-control" name="offeredImpressions">
                   </div>
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;">
                   <div class="col-xs-4 padding">Co-Registrations Offered to Affiliates (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
@@ -299,7 +303,7 @@
                     <input type="text" class="form-control" name="affiliateLeadPerClick">
                   </div>
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;">
                   <div class="col-xs-4 padding">Per 1000 Impression Affiliate Payout (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
@@ -314,7 +318,7 @@
                     <input type="hidden" class="form-control" name="affiliatePerSubSale" placeholder="Per Sub Sale">
                   </div>
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;">
                   <div class="col-xs-4 padding">Flat Per Sale Affiliate Payout (Not Added):
                   </div>
                   <div class="col-xs-8 padding">
@@ -322,7 +326,7 @@
                     <input type="text" class="form-control" id="offeredCoRegistrations" placeholder="Per Sub Sale" name="affiliateFlatPerSubSale">
                   </div>
                 </div>
-                <div class="row">
+                <div class="row" style="display: none;">
                   <div class="col-xs-4 padding">Network Run (Not Added)
                   </div>
                   <div class="col-xs-8 padding">
@@ -569,7 +573,7 @@
                 </div>
               </div>
             </div>
-            <div class="firstArea panel panel-default">
+            <div class="firstArea panel panel-default" style="display: none;">
               <div class="row">
                 <div class="col-xs-4 padding">
                   <h4>8. Geo-Tracking Information (Not Added)</h4>
@@ -869,15 +873,19 @@
                     
                     <INPUT TYPE="submit" style="width:50%" VALUE="Add New Campaign" class="btn btn-info btn-md btn-block">
                   </div>
-                  </form>
+                
+            </div>
+                
                 </div>
               </div>
-            </div>
+             </form>
 
           </div>
         </div>
       </div>
       </div>
+    </div>
+  </div>
       <script>$(function () {
       $('#accordion').on('shown.bs.collapse', function (e) {
       var offset = $('.panel.panel-default > .panel-collapse.in').offset();
